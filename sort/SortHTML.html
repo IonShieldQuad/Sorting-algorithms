@@ -1,0 +1,56 @@
+<!DOCTYPE HTML>
+
+<html>
+
+<title>Sorting algorithms</title>
+
+<head>
+	<meta charset="UTF-8">
+	<link href="SortCSS.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+
+	<div id="box">
+
+		<p id="boxTitle" class="ctr">Sorting algorithms</p>
+
+		<div>
+
+			<div id="canvBox">
+				<canvas id="canvas" width="600" height="600"></canvas>
+			</div>
+
+
+			<div id="arrBox">
+				<p class="ctr">Generate array</p>
+				<sub>Length:</sub>
+				<input id="arrLen" type="number" name="arrLen" value="1" />
+				<br /> <br />
+				<input type="button" onclick="makeArr()" value="Generate" />
+			</div>
+
+			<div id="sortBox">
+				<p class="ctr">Sorting</p>
+				<sub>Type:</sub>
+				<select id="type" name="type">
+					<option value="bogoSort">Bogosort O((n+1)!)</option>
+				</select>
+				<br />
+				<sub>Delay(ms):</sub>
+				<input id="delay" type="number" name="delay" value="100" />
+				<br />
+				<sub>Limit(s):</sub>
+				<input id="limit" type="number" name="limit" value="10" />
+				<br />
+				<input type="button" onclick="toggle()" value="Start/Stop" />
+			</div>
+
+		</div>
+	</div>
+
+</body>
+
+<script src="SortJS.js"></script>
+
+</html>
