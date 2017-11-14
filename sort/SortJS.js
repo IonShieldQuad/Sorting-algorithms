@@ -5,16 +5,26 @@ var mainArr = new Array();
 var arrLen = 0;
 var canvas = document.getElementById('canvas');
 var sorting = 0;
-var timeLimit = 10;
-var stertTime;
+var timeLimit = 60;
+var startTime;
+var delay;
+var hl = new Array();
 
 //Styles
 var fStyle1 = '#ddd';
 var fStyle2 = '#f69';
+var fStyle3 = '#f44';
 
 //Get random int from range
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+//Swaps 2 elements in array
+function swap(arr, i1, i2){
+	var temp = arr[i1];
+	arr[i1] = arr[i2];
+	arr[i2] = temp;
 }
 
 //Shuffle array
@@ -23,13 +33,16 @@ function shuffle (arr){
 	var j;
 	for (i=0; i<=arr.length-2; i++){
 		j = getRandomInt(i, arr.length-1);
-		temp = arr[i];
-		arr[i] = arr[j];
-		arr[j] = temp;
+		swap(arr, i, j);
 	}
 }
 
-//Generare randomized array
+//Stet to highlight an index
+function highlight (val){
+	hl[hl.length] = val;
+}
+
+//Generates randomized array
 function makeArr(){
 	mainArr.length = 0;
 	for (i = 0; i < Math.max(Math.min(document.getElementById('arrLen', 1000000).value, ), 0); i++){
@@ -38,6 +51,7 @@ function makeArr(){
 	shuffle(mainArr);
 	arrLen = mainArr.length;
 	update();
+	sorting = false;
 }
 
 //Updates canvas
@@ -56,6 +70,14 @@ function update(){
 		ctx.fillRect(i * delta, size - (delta * (mainArr[i])), delta, delta);
 		ctx.stroke();
 	}
+	//Highlights selected indexes
+	for (i = 0; i < hl.length; i++) {
+		ctx.fillStyle = fStyle3;
+		ctx.fillRect(hl[i] * delta, size, delta, - (delta * mainArr[hl[i]]));
+		ctx.stroke();
+	}
+	//Resets highligth
+	hl.length = 0;
 }
 
 //Toggles sorting
@@ -63,7 +85,8 @@ function toggle(){
 	sorting = !sorting;
 	if (sorting){
 		startTime = (new Date).getTime();
-		timeLimit = Math.max(Math.min((document.getElementById('limit').value), 60), 0);
+		delay = Math.max(Math.min((document.getElementById('delay').value), 10000), 0);
+		timeLimit = Math.max(Math.min((document.getElementById('limit').value), 3600), 0);
 		sort(document.getElementById('type').value);
 	}
 }
@@ -93,30 +116,69 @@ function isSorted(arr){
 function sort(type){
 	switch(type){
 	case 'bogoSort':
-	bogoSort(mainArr);
+	bogoSort(mainArr, 0);
 	break;
+	case 'bubbleSort':
+	bubbleSort(mainArr, 0, 0);
 	}
 }
 
 //Activates on sort finish
-function sortFinish(){
+function sortFinish(str){
 	sorting = false;
+	update();
+	if (str != null){
+		alert(str);
+	}
+}
+
+//Checks when to terminate sort
+function sortCheck(){
+	if (!sorting){
+			sortFinish();
+			return false;
+		}
+		else if (!checkTime()){
+			sortFinish('Time limit exceeded!');
+			return false;
+		}
+		return true
 }
 
 //Bogosort
-function bogoSort(arr){
-	while (!isSorted(arr)){
-		shuffle(arr);
+function bogoSort(arr, s){
+	if (!isSorted(arr)){
+		//Shuffle
+		var j = getRandomInt(s, arr.length-1);
+		var temp = arr[s];
+		arr[s] = arr[j];
+		arr[j] = temp;
+		highlight(s);
+		highlight(j);
 		update();
-		if (!sorting){
-			sortFinish();
-			break;
-		}
-		if (!checkTime()){
-			alert('Time limit exceeded!');
-			sortFinish();
-			break;
+		if (sortCheck()){
+			setTimeout(function(){bogoSort(arr, (s + 1) % (arr.length - 1));}, delay);
 		}
 	}
-	sortFinish();
+	else {sortFinish();}
+}
+
+//Bubble sort
+function bubbleSort(arr, s, r){
+	if (!isSorted(arr)){
+		if (arr[s] > arr[s+1]){
+			swap(arr, s, s+1);
+		}
+		highlight(s);
+		highlight(s+1);
+		update();
+		var r1 = r;
+		if (s == 0) {
+			r1++;
+		}
+		if (sortCheck()){
+			setTimeout(function(){bubbleSort(arr, (s + 1) % (arr.length - r), r1);}, delay);
+		}
+	}
+	else {sortFinish();}
 }
