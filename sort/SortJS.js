@@ -9,15 +9,25 @@ var timeLimit = 60;
 var startTime;
 var delay;
 var hl = new Array();
+var hlp = new Array();
 
 //Styles
 var fStyle1 = '#ddd';
 var fStyle2 = '#f69';
 var fStyle3 = '#f44';
+var fStyle4 = '#4f4';
 
 //Gets random int from range
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+//Sign alternator
+function signAlt(val){
+	if (val % 2) {
+		return -1;
+	}
+	return 1;
 }
 
 //Swaps 2 elements in array
@@ -37,8 +47,20 @@ function shuffle (arr){
 }
 
 //Sets to highlight an index
-function highlight (val){
-	hl[hl.length] = val;
+function highlight (val, p){
+	if (p != null){
+		switch (p){
+			case 1:
+			hlp[hlp.length] = val;
+			break;
+			
+			default:
+			hl[hl.length] = val;
+		}
+	}
+	else {
+		hl[hl.length] = val;
+	}
 }
 
 //Generates randomized array
@@ -75,8 +97,14 @@ function update(){
 		ctx.fillRect(hl[i] * delta, size, delta, - (delta * mainArr[hl[i]]));
 		ctx.stroke();
 	}
+	for (i = 0; i < hlp.length; i++) {
+		ctx.fillStyle = fStyle4;
+		ctx.fillRect(hlp[i] * delta, size, delta, - (delta * mainArr[hlp[i]]));
+		ctx.stroke();
+	}
 	//Resets highlight
 	hl.length = 0;
+	hlp.length = 0;
 }
 
 //Toggles sorting
@@ -111,11 +139,21 @@ function isSorted(arr){
 //Activates sort based on value
 function sort(type){
 	switch(type){
-	case 'bogoSort':
-	bogoSort(mainArr, 0);
-	break;
-	case 'bubbleSort':
-	bubbleSort(mainArr, 0, 0);
+		case 'bogoSort':
+		bogoSort(mainArr, 0);
+		break;
+	
+		case 'bubbleSort':
+		bubbleSort(mainArr, 0, 0);
+		break;
+	
+		case 'combSort':
+		combSort(mainArr, 0, 0);
+		break;
+	
+		case 'cocktailSort':
+		cocktailSort(mainArr, 0, 0);
+		break;
 	}
 }
 
@@ -162,6 +200,8 @@ function bubbleSort(arr, s, r){
 	if (!isSorted(arr)){
 		if (arr[s] > arr[s+1]){
 			swap(arr, s, s+1);
+			highlight(s, 1);
+			highlight(s+1, 1);
 		}
 		highlight(s);
 		highlight(s+1);
@@ -172,6 +212,51 @@ function bubbleSort(arr, s, r){
 		}
 		if (sortCheck()){
 			setTimeout(function(){bubbleSort(arr, (s + 1) % (arr.length - r), r1);}, delay);
+		}
+	}
+	else {sortFinish();}
+}
+
+//Comb sort
+function combSort(arr, s, r){
+	if (!isSorted(arr)){
+		var r1 = r;
+		if (s == 0) {
+			r1++;
+		}
+		var g = Math.ceil(arr.length / Math.pow(1.3, r1 + 1));
+		if (arr[s] > arr[s + g]){
+			swap(arr, s, s + g);
+			highlight(s, 1);
+			highlight(s + g, 1);
+		}
+		highlight(s);
+		highlight(s + g);
+		update();
+		if (sortCheck()){
+			setTimeout(function(){combSort(arr, (s + 1) % (arr.length - g), r1);}, delay);
+		}
+	}
+	else {sortFinish();}
+}
+
+//Cocktail sort
+function cocktailSort(arr, s, r){
+	if (!isSorted(arr)){
+		if (arr[s] > arr[s+1]){
+		swap(arr, s, s+1);
+		highlight(s, 1);
+		highlight(s+1, 1);
+		}
+		highlight(s);
+		highlight(s+1);
+		update();
+		var r1 = r;
+		if (((s <= r/2 + 1)&&(signAlt(r) < 0))||((s >= arr.length - r/2 - 3)&&(signAlt(r) > 0))) {
+			r1++;
+		}
+		if (sortCheck()){
+			setTimeout(function(){cocktailSort(arr, (s + signAlt(r)) % (arr.length - 1), r1);}, delay);
 		}
 	}
 	else {sortFinish();}
