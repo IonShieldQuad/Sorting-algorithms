@@ -15,7 +15,7 @@ var fStyle1 = '#ddd';
 var fStyle2 = '#f69';
 var fStyle3 = '#f44';
 
-//Get random int from range
+//Gets random int from range
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -27,9 +27,8 @@ function swap(arr, i1, i2){
 	arr[i2] = temp;
 }
 
-//Shuffle array
+//Shuffles array
 function shuffle (arr){
-	var temp;
 	var j;
 	for (i=0; i<=arr.length-2; i++){
 		j = getRandomInt(i, arr.length-1);
@@ -37,7 +36,7 @@ function shuffle (arr){
 	}
 }
 
-//Stet to highlight an index
+//Sets to highlight an index
 function highlight (val){
 	hl[hl.length] = val;
 }
@@ -76,7 +75,7 @@ function update(){
 		ctx.fillRect(hl[i] * delta, size, delta, - (delta * mainArr[hl[i]]));
 		ctx.stroke();
 	}
-	//Resets highligth
+	//Resets highlight
 	hl.length = 0;
 }
 
@@ -91,7 +90,7 @@ function toggle(){
 	}
 }
 
-//Check if time is over limit
+//Checks if time is over limit
 function checkTime(){
 	if ((startTime + (1000 * timeLimit) - (new Date).getTime()) < 0){
 		return false;
@@ -101,11 +100,8 @@ function checkTime(){
 
 //Checks if sorted
 function isSorted(arr){
-	for(i = 1; i < arr.length; i++){
-		if (arr[i] > arr[i-1]){
-			continue;
-		}
-		else {
+	for(i = 0; i < arr.length - 1; i++){
+		if (arr[i] > arr[i+1]){
 			return false;
 		}
 	}
@@ -150,9 +146,7 @@ function bogoSort(arr, s){
 	if (!isSorted(arr)){
 		//Shuffle
 		var j = getRandomInt(s, arr.length-1);
-		var temp = arr[s];
-		arr[s] = arr[j];
-		arr[j] = temp;
+		swap(arr, s, j);
 		highlight(s);
 		highlight(j);
 		update();
