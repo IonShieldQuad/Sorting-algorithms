@@ -10,12 +10,14 @@ var startTime;
 var delay;
 var hl = new Array();
 var hlp = new Array();
+var hls = new Array();
 
 //Styles
 var fStyle1 = '#ddd';
 var fStyle2 = '#f69';
 var fStyle3 = '#f44';
 var fStyle4 = '#4f4';
+var fStyle5 = '#f4f';
 
 //Gets random int from range
 function getRandomInt(min, max) {
@@ -37,6 +39,42 @@ function swap(arr, i1, i2){
 	arr[i2] = temp;
 }
 
+//Inserts element into array
+function insert(arr, i1, val){
+	var i2;
+	for (i2 = arr.length; i2 > i1; i2--){
+		arr[i2] = arr[i2-1];
+	}
+	arr[i1] = val;
+}
+
+//Removes element from array
+function remove(arr, i1){
+	var i2;
+	for (i2 = i1; i2 < arr.length - 1; i2++){
+		arr[i2] = arr[i2+1];
+	}
+}
+
+//Moves element in array with shifting
+function move(arr, i1, i2){
+	var l;
+	if (i1 > i2){
+		var temp = arr[i1];
+		for (l = i1; l > i2; l--){
+			arr[l] = arr[l-1];
+		}
+		arr[i2] = temp;
+	}
+	else {
+		var temp = arr[i1];
+		for (l = i1; l < i2; l++){
+			arr[l] = arr[l+1];
+		}
+		arr[i2] = temp;
+	}
+}
+
 //Shuffles array
 function shuffle (arr){
 	var j;
@@ -52,6 +90,10 @@ function highlight (val, p){
 		switch (p){
 			case 1:
 			hlp[hlp.length] = val;
+			break;
+			
+			case 2:
+			hls[hls.length] = val;
 			break;
 			
 			default:
@@ -102,9 +144,15 @@ function update(){
 		ctx.fillRect(hlp[i] * delta, size, delta, - (delta * mainArr[hlp[i]]));
 		ctx.stroke();
 	}
+	for (i = 0; i < hls.length; i++) {
+		ctx.fillStyle = fStyle5;
+		ctx.fillRect(hls[i] * delta, size, delta, - (delta * mainArr[hls[i]]));
+		ctx.stroke();
+	}
 	//Resets highlight
 	hl.length = 0;
 	hlp.length = 0;
+	hls.length = 0;
 }
 
 //Toggles sorting
@@ -153,6 +201,14 @@ function sort(type){
 	
 		case 'cocktailSort':
 		cocktailSort(mainArr, 0, 0);
+		break;
+		
+		case 'insertionSort':
+		insertionSort(mainArr, 0, 0);
+		break;
+		
+		case 'gnomeSort':
+		gnomeSort(mainArr, 0);
 		break;
 	}
 }
@@ -205,6 +261,7 @@ function bubbleSort(arr, s, r){
 		}
 		highlight(s);
 		highlight(s+1);
+		highlight(arr.length + 1 - r, 2);
 		update();
 		var r1 = r;
 		if (s == 0) {
@@ -250,6 +307,8 @@ function cocktailSort(arr, s, r){
 		}
 		highlight(s);
 		highlight(s+1);
+		highlight(Math.floor(r/2)-1, 2);
+		highlight(arr.length - Math.ceil(r/2), 2);
 		update();
 		var r1 = r;
 		if (((s <= r/2 + 1)&&(signAlt(r) < 0))||((s >= arr.length - r/2 - 3)&&(signAlt(r) > 0))) {
@@ -257,6 +316,60 @@ function cocktailSort(arr, s, r){
 		}
 		if (sortCheck()){
 			setTimeout(function(){cocktailSort(arr, (s + signAlt(r)) % (arr.length - 1), r1);}, delay);
+		}
+	}
+	else {sortFinish();}
+}
+
+//Gnome sort
+function gnomeSort(arr, s){
+	if (!isSorted(arr)){
+		var b = false;
+		if (arr[s] > arr[s+1]){
+			swap(arr, s, s+1);
+			highlight(s, 1);
+			highlight(s+1, 1);
+			b = true;
+		}
+		highlight(s);
+		highlight(s+1);
+		update();
+		if (sortCheck()){
+			if (!b){
+				setTimeout(function(){gnomeSort(arr, (s + 1) % (arr.length - 1));}, delay);
+			}
+			else {
+				setTimeout(function(){gnomeSort(arr, (s - 1) % (arr.length - 1));}, delay);
+			}
+		}
+	}
+	else {sortFinish();}
+}
+
+//Insertion sort
+function insertionSort(arr, s, r){
+	if (!isSorted(arr)){
+		var r1 = r;
+		var n = false;
+		if (arr[s+1] < arr[s]){
+			swap(arr, s+1, s);
+			highlight(s);
+			highlight(s+1);
+		}
+		else {
+			n = true;
+			r1++;
+			highlight(s+1, 1);
+		}
+		highlight(r+1, 2);
+		update();
+		if (sortCheck()){
+			if (!n){
+				setTimeout(function(){insertionSort(arr, (s - 1) % (arr.length - 1), r1);}, delay);
+			}
+			else {
+				setTimeout(function(){insertionSort(arr, (r1-1) % (arr.length - 1), r1);}, delay);
+			}
 		}
 	}
 	else {sortFinish();}
