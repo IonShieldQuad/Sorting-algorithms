@@ -210,6 +210,10 @@ function sort(type){
 		case 'gnomeSort':
 		gnomeSort(mainArr, 0);
 		break;
+		
+		case 'radixLSDSort':
+		radixLSDSort(mainArr, 0, 0, 0);
+		break;
 	}
 }
 
@@ -370,6 +374,41 @@ function insertionSort(arr, s, r){
 			else {
 				setTimeout(function(){insertionSort(arr, (r1-1) % (arr.length - 1), r1);}, delay);
 			}
+		}
+	}
+	else {sortFinish();}
+}
+
+//Radix LSD sort
+function radixLSDSort(arr, s, r, queue){
+	if (!(isSorted(arr) && (s == 0))){
+		var r1 = r;
+		if (s == 0){
+			r1++;
+		}
+		var queue1 = queue;
+		if ((r1 == 1)&&(s == 0)){
+		queue1 = [ [],[],[],[],[],[],[],[],[],[] ];
+		}
+		var digit = Math.floor((arr[s] % Math.pow(10, Math.ceil(r1/2))) / Math.pow(10, Math.ceil(r1/2)-1));
+		if (r1%2){
+			queue1[digit].push(arr[s]);
+			highlight(s);
+		}
+		else {
+			var q = 0;
+			for (q = 0; q < 10; q++){
+				if (queue1[q].length > 0){
+					arr[s] = queue1[q][0];
+					highlight(s, 1);
+					queue1[q].shift();
+					break;
+				}
+			}
+		}
+		update();
+		if (sortCheck()){
+			setTimeout(function(){radixLSDSort(arr, (s + 1) % (arr.length), r1, queue1);}, delay);
 		}
 	}
 	else {sortFinish();}
