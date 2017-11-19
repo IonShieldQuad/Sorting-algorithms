@@ -118,24 +118,21 @@ function update(){
 		ctx.stroke();
 		ctx.fillStyle = fStyle2;
 		ctx.fillRect(i * delta, size - (delta * (mainArr[i])), delta, delta);
-		ctx.stroke();
 	}
 	//Highlights selected indexes
 	for (i = 0; i < hl.length; i++) {
 		ctx.fillStyle = fStyle3;
 		ctx.fillRect(hl[i] * delta, size, delta, - (delta * mainArr[hl[i]]));
-		ctx.stroke();
 	}
 	for (i = 0; i < hlp.length; i++) {
 		ctx.fillStyle = fStyle4;
 		ctx.fillRect(hlp[i] * delta, size, delta, - (delta * mainArr[hlp[i]]));
-		ctx.stroke();
 	}
 	for (i = 0; i < hls.length; i++) {
 		ctx.fillStyle = fStyle5;
 		ctx.fillRect(hls[i] * delta, size, delta, - (delta * mainArr[hls[i]]));
-		ctx.stroke();
 	}
+	ctx.stroke();
 	//Resets highlight
 	hl.length = 0;
 	hlp.length = 0;
@@ -296,15 +293,15 @@ function combSort(arr, s, r, end){
 
 //Cocktail sort
 function cocktailSort(arr, s, r, end){
-	if (!(end && (s <= r/2))){
+	if (!(end && (s == Math.floor((arr.length - 1) / 2))&&((signAlt(r) > 0)))){
 		var end0 = end;
 		var r0 = r;
-		if (((s <= r/2 + 1)&&(signAlt(r) < 0))||((s >= arr.length - r/2 - 3)&&(signAlt(r) > 0))) {
+		if (((s <= Math.floor(r/2) + 1)&&(signAlt(r) < 0))||((s >= arr.length - Math.ceil(r/2) - 3)&&(signAlt(r) > 0))) {
 			r0++;
-			end0 = true;
 		}
-		if (s <= r/2 + 1){
+		if ((s == Math.floor((arr.length - 1) / 2))&&((signAlt(r) > 0))){
 			end0 = true;
+			//alert(s +' '+ Math.floor((arr.length - 1) / 2));
 		}
 		if (arr[s] > arr[s+1]){
 			swap(arr, s, s+1);
