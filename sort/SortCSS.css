@@ -5,10 +5,6 @@ html {
 	background: radial-gradient(circle, #f69, #f69, #888, #444, #649);
 }
 
-p.ctr {
-	text-align: center;
-}
-
 div#box {
 	border: 8px outset #888;
 	border-radius: 100px;
@@ -16,13 +12,20 @@ div#box {
 	margin: 200px auto 200px auto;
 	background-color: #888;
 	min-width: 1000px;
-	max-width: 1000px;
-	min-height: 800px;
+	max-width: 1050px;
+	min-height: 880px;
 	max-height: 2000px;
 }
 
-p#boxTitle {
+div#boxTitle {
 	font-size: 40px;
+	text-align: center;
+	border: 5px inset #444;
+	border-radius: 25px;
+	padding: 15px;
+	margin: 10px 20px 10px 20px;
+	background-color: #444;
+	font-weight: bold;
 }
 
 div#arrBox {
@@ -33,7 +36,7 @@ div#arrBox {
 	margin: 20px;
 	background-color: #444;
 	min-width: 250px;
-	max-width: 350px;
+	max-width: 320px;
 	min-height: 100px;
 	max-height: 600px;
 }
@@ -47,7 +50,7 @@ div#sortBox {
 	margin: 20px;
 	background-color: #444;
 	min-width: 250px;
-	max-width: 350px;
+	max-width: 320px;
 	min-height: 100px;
 	max-height: 600px;
 }
@@ -68,4 +71,87 @@ div#canvBox {
 	border-radius: 4px;
 	width: 100%;
 	height: 100%;
+}
+
+div.subtitle {
+	background-color: #888;
+	border: 3px outset #888;
+	border-radius: 10px;
+	margin: 5px 0px 10px 0px;
+	padding: 5px;
+	color: #222;
+	font-size: 36px;
+	vertical-align: middle;
+	text-align: center;
+	font-weight: bold;
+}
+
+div.param {
+	background-color: #888;
+	border: 2px outset #888;
+	border-radius: 10px;
+	margin: 10px 20px 10px 0px;
+	padding: 5px;
+	color: #222;
+	font-size: 16px;
+	vertical-align: middle;
+	text-align: justify;
+}
+
+select, input, button {
+	-moz-appearance: none;
+	-webkit-appearance: none;
+	appearance: none;
+}
+
+div.param select, div.param input {
+	background-color: #ddd;
+	border: 2px inset #ddd;
+	border-radius: 6px;
+	margin: 0px;
+	padding: 4px;
+	color: #649;
+	font-size: 14px;
+}
+
+input.button {
+	width: 80%;
+	text-align: bottom;
+	max-width: 300px;
+	background-color: #999;
+	border: 3px outset #f6f;
+	border-radius: 10px;
+	margin: 5px 20px 5px 20px;
+	left: 10%;
+	padding: 2px;
+	color: #222;
+	font-size: 30px;
+	height: 48px;
+	transition: color 0.1s, box-shadow 0.1s, border 0.1s, background-color 0.1s, font-size 0.1s;
+}
+
+div.param select:hover, div.param input:hover {
+	border-color: #f69;
+}
+
+div.param select:focus, div.param input:focus {
+	border-color: #f69;
+	background-color: #bad;
+	color: #222;
+}
+
+input.button:hover {
+	border: 3px inset #f69;
+	background-color: #999;
+	box-shadow: 5px 5px 5px 0px #222 inset;
+	color: #c46;
+	font-size: 28px;
+}
+
+input.button:active {
+	border: 3px inset #f69;
+	background-color: #c79;
+	box-shadow: 8px 8px 5px 0px #222 inset;
+	color: #f69;
+	font-size: 27px;
 }

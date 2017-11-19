@@ -13,7 +13,7 @@
 
 	<div id="box">
 
-		<p id="boxTitle" class="ctr">Sorting algorithms</p>
+		<div id="boxTitle" class="ctr">Sorting algorithms</div>
 
 		<div>
 
@@ -23,33 +23,50 @@
 
 
 			<div id="arrBox">
-				<p class="ctr">Generate array</p>
-				<sub>Length:</sub>
-				<input id="arrLen" type="number" name="arrLen" value="1" />
-				<br /> <br />
-				<input type="button" onclick="makeArr()" value="Generate" />
+				<div class="subtitle">
+					Array
+				</div>
+				<div class="param">
+					Length:
+					<input id="arrLen" type="number" name="arrLen" value="99" />
+				</div>
+				<div class="param">
+					Method:
+					<select id="arrMethod" name="arrMethod">
+						<option value="linear">Linear</option>
+						<option value="random">Random</option>
+						<option value="sorted">Sorted</option>
+						<option value="reverse">Reverse</option>
+					</select>
+				</div>
+				<input class="button" type="button" onclick="makeArr()" value="Generate" />
 			</div>
 
 			<div id="sortBox">
-				<p class="ctr">Sorting</p>
-				<sub>Type:</sub>
-				<select id="type" name="type">
-					<option value="bubbleSort">Bubble sort O(n^2)</option>
-					<option value="combSort">Comb sort O(n^2/2^p)</option>
-					<option value="cocktailSort">Cocktail sort O(n^2)</option>
-					<option value="insertionSort">Insertion sort O(n^2)</option>
-					<option value="gnomeSort">Gnome sort O(n^2)</option>
-					<option value="radixLSDSort">Radix LSD sort O(wn)</option>
-					<option value="bogoSort">Bogosort O((n+1)!)</option>
-				</select>
-				<br />
-				<sub>Delay(ms):</sub>
-				<input id="delay" type="number" name="delay" value="100" />
-				<br />
-				<sub>Limit(s):</sub>
-				<input id="limit" type="number" name="limit" value="60" />
-				<br />
-				<input type="button" onclick="toggle()" value="Start/Stop" />
+				<div class="subtitle">
+					Sorting
+				</div>
+				<div class="param">
+					Type:
+					<select id="type" name="type">
+						<option value="bubbleSort">Bubble sort O(n^2)</option>
+						<option value="combSort">Comb sort O(n^2/2^p)</option>
+						<option value="cocktailSort">Cocktail sort O(n^2)</option>
+						<option value="insertionSort">Insertion sort O(n^2)</option>
+						<option value="gnomeSort">Gnome sort O(n^2)</option>
+						<option value="radixLSDSort">Radix LSD sort O(wn)</option>
+						<option value="bogoSort">Bogosort O((n+1)!)</option>
+					</select>
+				</div>
+				<div class="param">
+					Delay(ms):
+					<input id="delay" type="number" name="delay" value="0" />
+				</div>
+				<div class="param">
+					Limit(s):
+					<input id="limit" type="number" name="limit" value="3600" />
+				</div>
+				<input class="button" type="button" onclick="toggle()" value="Start/Stop" />
 			</div>
 
 		</div>

@@ -39,42 +39,6 @@ function swap(arr, i1, i2){
 	arr[i2] = temp;
 }
 
-//Inserts element into array
-function insert(arr, i1, val){
-	var i2;
-	for (i2 = arr.length; i2 > i1; i2--){
-		arr[i2] = arr[i2-1];
-	}
-	arr[i1] = val;
-}
-
-//Removes element from array
-function remove(arr, i1){
-	var i2;
-	for (i2 = i1; i2 < arr.length - 1; i2++){
-		arr[i2] = arr[i2+1];
-	}
-}
-
-//Moves element in array with shifting
-function move(arr, i1, i2){
-	var l;
-	if (i1 > i2){
-		var temp = arr[i1];
-		for (l = i1; l > i2; l--){
-			arr[l] = arr[l-1];
-		}
-		arr[i2] = temp;
-	}
-	else {
-		var temp = arr[i1];
-		for (l = i1; l < i2; l++){
-			arr[l] = arr[l+1];
-		}
-		arr[i2] = temp;
-	}
-}
-
 //Shuffles array
 function shuffle (arr){
 	var j;
@@ -107,14 +71,37 @@ function highlight (val, p){
 
 //Generates randomized array
 function makeArr(){
-	mainArr.length = 0;
-	for (i = 0; i < Math.max(Math.min(document.getElementById('arrLen', 1000000).value, ), 0); i++){
-		mainArr[i] = i + 1;
-	}
-	shuffle(mainArr);
-	arrLen = mainArr.length;
-	update();
 	sorting = false;
+	mainArr.length = 0;
+	arrLen = Math.max(Math.min(document.getElementById('arrLen', 10000).value, ), 0);
+	switch(document.getElementById('arrMethod').value){
+		case 'linear':
+		for (i = 0; i < arrLen; i++){
+			mainArr[i] = i + 1;
+		}
+		shuffle(mainArr);
+		break;
+		
+		case 'random':
+		for (i = 0; i < arrLen; i++){
+			mainArr[i] = getRandomInt(1, arrLen);
+		}
+		shuffle(mainArr);
+		break;
+		
+		case 'sorted':
+		for (i = 0; i < arrLen; i++){
+			mainArr[i] = i + 1;
+		}
+		break;
+		
+		case 'reverse':
+		for (i = 0; i < arrLen; i++){
+			mainArr[i] = arrLen - i;
+		}
+		break;
+	}
+	update();
 }
 
 //Updates canvas
@@ -192,15 +179,15 @@ function sort(type){
 		break;
 	
 		case 'bubbleSort':
-		bubbleSort(mainArr, 0, 0);
+		bubbleSort(mainArr, 0, 0, false);
 		break;
 	
 		case 'combSort':
-		combSort(mainArr, 0, 0);
+		combSort(mainArr, 0, 0, false);
 		break;
 	
 		case 'cocktailSort':
-		cocktailSort(mainArr, 0, 0);
+		cocktailSort(mainArr, 0, 0, false);
 		break;
 		
 		case 'insertionSort':
@@ -212,7 +199,7 @@ function sort(type){
 		break;
 		
 		case 'radixLSDSort':
-		radixLSDSort(mainArr, 0, 0, 0);
+		radixLSDSort(mainArr, 0, 0, 0, 0);
 		break;
 	}
 }
@@ -256,70 +243,82 @@ function bogoSort(arr, s){
 }
 
 //Bubble sort
-function bubbleSort(arr, s, r){
-	if (!isSorted(arr)){
+function bubbleSort(arr, s, r, end){
+	if (!(end && s == 0)){
+		var end0 = end;
 		if (arr[s] > arr[s+1]){
 			swap(arr, s, s+1);
 			highlight(s, 1);
 			highlight(s+1, 1);
+			end0 = false;
 		}
 		highlight(s);
 		highlight(s+1);
 		highlight(arr.length + 1 - r, 2);
 		update();
-		var r1 = r;
+		var r0 = r;
 		if (s == 0) {
-			r1++;
+			r0++;
+			end0 = true;
 		}
 		if (sortCheck()){
-			setTimeout(function(){bubbleSort(arr, (s + 1) % (arr.length - r), r1);}, delay);
+			setTimeout(function(){bubbleSort(arr, (s + 1) % (arr.length - r), r0, end0);}, delay);
 		}
 	}
 	else {sortFinish();}
 }
 
 //Comb sort
-function combSort(arr, s, r){
-	if (!isSorted(arr)){
-		var r1 = r;
+function combSort(arr, s, r, end){
+	if (!(end && s == 0  && Math.ceil(arr.length / Math.pow(1.3, r + 1)) <= 1)){
+		var end0 = end;
+		var r0 = r;
 		if (s == 0) {
-			r1++;
+			r0++;
+			end0 = true;
 		}
-		var g = Math.ceil(arr.length / Math.pow(1.3, r1 + 1));
+		var g = Math.ceil(arr.length / Math.pow(1.3, r0 + 1));
 		if (arr[s] > arr[s + g]){
 			swap(arr, s, s + g);
 			highlight(s, 1);
 			highlight(s + g, 1);
+			end0 = false;
 		}
 		highlight(s);
 		highlight(s + g);
 		update();
 		if (sortCheck()){
-			setTimeout(function(){combSort(arr, (s + 1) % (arr.length - g), r1);}, delay);
+			setTimeout(function(){combSort(arr, (s + 1) % (arr.length - g), r0, end0);}, delay);
 		}
 	}
 	else {sortFinish();}
 }
 
 //Cocktail sort
-function cocktailSort(arr, s, r){
-	if (!isSorted(arr)){
+function cocktailSort(arr, s, r, end){
+	if (!(end && (s <= r/2))){
+		var end0 = end;
+		var r0 = r;
+		if (((s <= r/2 + 1)&&(signAlt(r) < 0))||((s >= arr.length - r/2 - 3)&&(signAlt(r) > 0))) {
+			r0++;
+			end0 = true;
+		}
+		if (s <= r/2 + 1){
+			end0 = true;
+		}
 		if (arr[s] > arr[s+1]){
-		swap(arr, s, s+1);
-		highlight(s, 1);
-		highlight(s+1, 1);
+			swap(arr, s, s+1);
+			highlight(s, 1);
+			highlight(s+1, 1);
+			end0 = false;
 		}
 		highlight(s);
 		highlight(s+1);
 		highlight(Math.floor(r/2)-1, 2);
 		highlight(arr.length - Math.ceil(r/2), 2);
 		update();
-		var r1 = r;
-		if (((s <= r/2 + 1)&&(signAlt(r) < 0))||((s >= arr.length - r/2 - 3)&&(signAlt(r) > 0))) {
-			r1++;
-		}
 		if (sortCheck()){
-			setTimeout(function(){cocktailSort(arr, (s + signAlt(r)) % (arr.length - 1), r1);}, delay);
+			setTimeout(function(){cocktailSort(arr, (s + signAlt(r)) % (arr.length - 1), r0, end0);}, delay);
 		}
 	}
 	else {sortFinish();}
@@ -327,7 +326,7 @@ function cocktailSort(arr, s, r){
 
 //Gnome sort
 function gnomeSort(arr, s){
-	if (!isSorted(arr)){
+	if (s < arr.length - 1){
 		var b = false;
 		if (arr[s] > arr[s+1]){
 			swap(arr, s, s+1);
@@ -340,7 +339,7 @@ function gnomeSort(arr, s){
 		update();
 		if (sortCheck()){
 			if (!b){
-				setTimeout(function(){gnomeSort(arr, (s + 1) % (arr.length - 1));}, delay);
+				setTimeout(function(){gnomeSort(arr, (s + 1) % (arr.length));}, delay);
 			}
 			else {
 				setTimeout(function(){gnomeSort(arr, (s - 1) % (arr.length - 1));}, delay);
@@ -352,8 +351,8 @@ function gnomeSort(arr, s){
 
 //Insertion sort
 function insertionSort(arr, s, r){
-	if (!isSorted(arr)){
-		var r1 = r;
+	if (r < arr.length){
+		var r0 = r;
 		var n = false;
 		if (arr[s+1] < arr[s]){
 			swap(arr, s+1, s);
@@ -362,17 +361,17 @@ function insertionSort(arr, s, r){
 		}
 		else {
 			n = true;
-			r1++;
+			r0++;
 			highlight(s+1, 1);
 		}
 		highlight(r+1, 2);
 		update();
 		if (sortCheck()){
 			if (!n){
-				setTimeout(function(){insertionSort(arr, (s - 1) % (arr.length - 1), r1);}, delay);
+				setTimeout(function(){insertionSort(arr, (s - 1) % (arr.length - 1), r0);}, delay);
 			}
 			else {
-				setTimeout(function(){insertionSort(arr, (r1-1) % (arr.length - 1), r1);}, delay);
+				setTimeout(function(){insertionSort(arr, (r0-1) % (arr.length - 1), r0);}, delay);
 			}
 		}
 	}
@@ -380,35 +379,46 @@ function insertionSort(arr, s, r){
 }
 
 //Radix LSD sort
-function radixLSDSort(arr, s, r, queue){
-	if (!(isSorted(arr) && (s == 0))){
-		var r1 = r;
+function radixLSDSort(arr, s, r, queue, numLen){
+	if (!(r > 1 && s == 0 && Math.floor(r/2) > numLen - 1)){
+		var r0 = r;
+		var queue0 = queue;
+		var q = 0;
+		var numLen0 = numLen;
 		if (s == 0){
-			r1++;
+			r0++;
 		}
-		var queue1 = queue;
-		if ((r1 == 1)&&(s == 0)){
-		queue1 = [ [],[],[],[],[],[],[],[],[],[] ];
+		if (r0 == 1 && s == arr.length - 1){
+			for (q = 0; q < 10; q++){
+				if (queue0[q].length > 0){
+					var qq;
+					for (qq = 0; qq < queue0[q].length; qq++){
+						numLen0 = Math.ceil(Math.max(Math.log(queue0[q][qq] + 1) / Math.LN10, numLen0));
+					}
+				}
+			}
 		}
-		var digit = Math.floor((arr[s] % Math.pow(10, Math.ceil(r1/2))) / Math.pow(10, Math.ceil(r1/2)-1));
-		if (r1%2){
-			queue1[digit].push(arr[s]);
+		if ((r0 == 1)&&(s == 0)){
+		queue0 = [ [],[],[],[],[],[],[],[],[],[] ];
+		}
+		var digit = Math.floor((arr[s] % Math.pow(10, Math.ceil(r0/2))) / Math.pow(10, Math.ceil(r0/2)-1));
+		if (r0 % 2){
+			queue0[digit].push(arr[s]);
 			highlight(s);
 		}
 		else {
-			var q = 0;
 			for (q = 0; q < 10; q++){
-				if (queue1[q].length > 0){
-					arr[s] = queue1[q][0];
+				if (queue0[q].length > 0){
+					arr[s] = queue0[q][0];
 					highlight(s, 1);
-					queue1[q].shift();
+					queue0[q].shift();
 					break;
 				}
 			}
 		}
 		update();
 		if (sortCheck()){
-			setTimeout(function(){radixLSDSort(arr, (s + 1) % (arr.length), r1, queue1);}, delay);
+			setTimeout(function(){radixLSDSort(arr, (s + 1) % (arr.length), r0, queue0, numLen0);}, delay);
 		}
 	}
 	else {sortFinish();}
