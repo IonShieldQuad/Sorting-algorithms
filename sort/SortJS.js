@@ -13,14 +13,33 @@ var hlp = new Array();
 var hls = new Array();
 
 //Styles
+var fStyle0 = '#444';
 var fStyle1 = '#ddd';
 var fStyle2 = '#f69';
 var fStyle3 = '#f44';
 var fStyle4 = '#4f4';
 var fStyle5 = '#f4f';
 
+//Updates colors from menu
+function colorsUpdate(){
+	var colorMenu = document.getElementById('colorMenu');
+	if (colorMenu.style.visibility == 'visible'){
+		fStyle0 = document.getElementById('colorBG').value;
+		fStyle1 = document.getElementById('colorBars').value;
+		fStyle2 = document.getElementById('colorDots').value;
+		fStyle3 = document.getElementById('colorHL').value;
+		fStyle4 = document.getElementById('colorHLP').value;
+		fStyle5 = document.getElementById('colorHLS').value;
+		colorMenu.style.visibility = 'collapse';
+		update();
+	}
+	else {
+		colorMenu.style.visibility = 'visible';
+	}
+}
+
 //Gets random int from range
-function getRandomInt(min, max) {
+function getRandomInt(min, max){
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
@@ -110,12 +129,12 @@ function update(){
 	var delta = size / arrLen;
 	var ctx = canvas.getContext("2d");
 	
-	ctx.clearRect(0, 0, size, size); //Clears canvas
+	ctx.fillStyle = fStyle0;
+	ctx.fillRect(0, 0, size, size); //Clears canvas
 	
 	for (i = 0; i < arrLen; i++){ //Draws a column
 		ctx.fillStyle = fStyle1;
 		ctx.fillRect(i * delta, size, delta, - (delta * (mainArr[i]) - 1));
-		ctx.stroke();
 		ctx.fillStyle = fStyle2;
 		ctx.fillRect(i * delta, size - (delta * (mainArr[i])), delta, delta);
 	}
@@ -293,7 +312,7 @@ function combSort(arr, s, r, end){
 
 //Cocktail sort
 function cocktailSort(arr, s, r, end){
-	if (!(end && (s == Math.floor((arr.length - 1) / 2))&&((signAlt(r) > 0)))){
+	if (r < arr.length && !(end && (s == Math.floor((arr.length - 1) / 2))&&((signAlt(r) > 0)))){
 		var end0 = end;
 		var r0 = r;
 		if (((s <= Math.floor(r/2) + 1)&&(signAlt(r) < 0))||((s >= arr.length - Math.ceil(r/2) - 3)&&(signAlt(r) > 0))) {

@@ -17,6 +17,41 @@
 
 		<div>
 
+		<div id="colorBtn">
+				<input type="button" onclick="colorsUpdate()" value="Color" />
+				<div id="colorMenu">
+					<div class="colorIn">
+						Background:
+						<input id="colorBG" type="color" value="#444444" />
+					</div>
+				
+					<div class="colorIn">
+						Bars:
+						<input id="colorBars" type="color" value="#dddddd" />
+					</div>
+					
+					<div class="colorIn">
+						Dots:
+						<input id="colorDots" type="color" value="#ff6699" />
+					</div>
+					
+					<div class="colorIn">
+						Highlight:
+						<input id="colorHL" type="color" value="#ff4444" />
+					</div>
+					
+					<div class="colorIn">
+						Hightlight-alt:
+						<input id="colorHLP" type="color" value="#44ff44" />
+					</div>
+					
+					<div class="colorIn">
+						Highlight-special:
+						<input id="colorHLS" type="color" value="#44ffff" />
+					</div>
+				</div>
+			</div>
+		
 			<div id="canvBox">
 				<canvas id="canvas" width="600" height="600"></canvas>
 			</div>
@@ -68,7 +103,7 @@
 				</div>
 				<input class="button" type="button" onclick="toggle()" value="Start/Stop" />
 			</div>
-
+			
 		</div>
 	</div>
 
