@@ -74,8 +74,8 @@ div#canvBox {
 	height: 100%;
 }
 
-#colorBtn {
-	background: linear-gradient(to right, red, orange, yellow, lime, cyan, blue, darkviolet);
+div#colorBtn {
+	background: linear-gradient(to right, black, red, orange, yellow, lime, cyan, blue, darkviolet, black);
 	margin: 5px 20px 10px 20px;
 	padding: 2px;
 	border: 2px outset #888;
@@ -85,7 +85,7 @@ div#canvBox {
 	width: 250px;
 }
 
-#colorBtn input[type = button] {
+div#colorBtn input[type = button] {
 	background-color: #888;
 	border: 2px solid #888;
 	border-radius: 10px;
@@ -99,24 +99,24 @@ div#canvBox {
 	width: 100%;
 }
 
-#colorBtn input:hover {
+div#colorBtn input[type = button]:hover {
 	border: 2px inset #f69;
 	background-color: #a89;
 	color: #624;
 }
 
-#colorBtn input:active {
+div#colorBtn input[type = button]:active {
 	border: 2px inset #f69;
 	background-color: #a89;
 	box-shadow: 5px 5px 5px 0px #222 inset;
 	color: #c46;
 }
 
-#colorMenu {
+div#colorMenu {
 	visibility: collapse;
 	background-color: #888;
 	border: 2px outset #888;
-	border-radius: 10px;
+	border-radius: 20px;
 	margin: 10px 20px 10px 0px;
 	padding: 5px;
 	vertical-align: middle;
@@ -127,37 +127,35 @@ div#canvBox {
 	height: 245px;
 }
 
-#colorMenu input {
-	border: 1px inset #888;
+div#colorMenu input {
+	border: 1px outset #888;
 	border-radius: 4px;
 	background-color: #888;
 	padding: 2px;
 	margin: 2px;
 	float: right;
-	height: 
 }
 
-#colorMenu input:hover {
+div#colorMenu input:hover {
 	border-width: 1px;
 	border-color: #f69;
 }
 
-#colorMenu input:focus {
+div#colorMenu input:focus {
 	border-width: 2px;
 	border-color: #f69;
 	background-color: #bad;
 	color: #222;
 }
 
-#colorMenu input:active {
-	border-width: 2px;
+div#colorMenu input:active {
+	border: 2px inset #f69;
 	box-shadow: none;
-	border-color: #f69;
 	background-color: #bad;
 	color: #222;
 }
 
-.colorIn {
+div.colorIn {
 	background-color: #888;
 	border: 2px inset #888;
 	border-radius: 10px;

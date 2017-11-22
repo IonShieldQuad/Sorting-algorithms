@@ -92,7 +92,8 @@ function highlight (val, p){
 function makeArr(){
 	sorting = false;
 	mainArr.length = 0;
-	arrLen = Math.max(Math.min(document.getElementById('arrLen', 10000).value, ), 0);
+	arrLen = Math.max(Math.min(document.getElementById('arrLen').value, 10000), 0);
+	document.getElementById('arrLen').value = arrLen;
 	switch(document.getElementById('arrMethod').value){
 		case 'linear':
 		for (i = 0; i < arrLen; i++){
@@ -164,7 +165,9 @@ function toggle(){
 	if (sorting){
 		startTime = (new Date).getTime();
 		delay = Math.max(Math.min((document.getElementById('delay').value), 10000), 0);
+		document.getElementById('delay').value = delay;
 		timeLimit = Math.max(Math.min((document.getElementById('limit').value), 3600), 0);
+		document.getElementById('limit').value = timeLimit;
 		sort(document.getElementById('type').value);
 	}
 }
@@ -320,7 +323,6 @@ function cocktailSort(arr, s, r, end){
 		}
 		if ((s == Math.floor((arr.length - 1) / 2))&&((signAlt(r) > 0))){
 			end0 = true;
-			//alert(s +' '+ Math.floor((arr.length - 1) / 2));
 		}
 		if (arr[s] > arr[s+1]){
 			swap(arr, s, s+1);
