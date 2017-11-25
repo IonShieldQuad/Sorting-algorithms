@@ -8,17 +8,19 @@ var sorting = 0;
 var timeLimit = 60;
 var startTime;
 var delay;
+var animHdl;
+var animOffset = 0;
 var hl = new Array();
 var hlp = new Array();
 var hls = new Array();
 
 //Styles
-var fStyle0 = '#444';
-var fStyle1 = '#ddd';
-var fStyle2 = '#f69';
-var fStyle3 = '#f44';
-var fStyle4 = '#4f4';
-var fStyle5 = '#f4f';
+var fStyle0 = '#444'; //Background
+var fStyle1 = '#ddd'; //Bars
+var fStyle2 = '#f69'; //Dots
+var fStyle3 = '#f44'; //Highlight
+var fStyle4 = '#4f4'; //Highlight alt
+var fStyle5 = '#f4f'; //Highlight special
 
 //Updates colors from menu
 function colorsUpdate(){
@@ -35,6 +37,55 @@ function colorsUpdate(){
 	}
 	else {
 		colorMenu.style.visibility = 'visible';
+	}
+}
+
+//Updates status box
+function updateStat(key, str){
+	var statBar = document.getElementById('statBar');
+	var statText = document.getElementById('status');
+	var barStyle0 = '#232'; //Idle
+	var barStyle1 = '#2fd'; //Finished
+	var barStyle2 = '#f42'; //Error
+	var barStyle3 = '#222'; //Running 0
+	var barStyle4 = '#2f2'; //Running 1
+	switch (key){
+		case 0:
+		statBar.style.background = barStyle0;
+		statText.innerHTML = 'Idling';
+		break;
+		
+		case 1:
+		statBar.style.background = barStyle1;
+		statText.innerHTML = 'Finished sorting in ' + ((new Date).getTime() - startTime) / 1000 + ' seconds';
+		break;
+		
+		case 2:
+		statBar.style.background = barStyle2;
+		statText.innerHTML = 'Error: ' + str;
+		break;
+		
+		case 3:
+		statBar.style.background = ('linear-gradient(to right, '+ barStyle3 +'0%,'+ barStyle4 +'50%,'+ barStyle3 +'100%)');
+		statText.innerHTML = 'Sorting with ' + str;
+		animHdl = setInterval(function(){animTick(statBar, barStyle3, barStyle4)}, 100);
+		animOffset = 0;
+		break;
+	}
+	if (key != 3){
+		animOffset = -1;
+	}
+}
+
+//Animation refresh
+function animTick(ref, s0, s1){
+	if (animOffset < 0){
+		clearInterval(animHdl);
+	}
+	else {
+		ref.style.background = ('linear-gradient(to right, '+s0+' '+(animOffset-100)%200+'%,'+s1+' '+(animOffset-50)%200+'%,'+s0+' '+animOffset%200+'%,'+s1+' '+(animOffset+50)%200+'%,'+s0+' '+(animOffset+100)%200+'%)');
+		animOffset += 10;
+		animOffset %= 100;
 	}
 }
 
@@ -122,6 +173,7 @@ function makeArr(){
 		break;
 	}
 	update();
+	updateStat(0);
 }
 
 //Updates canvas
@@ -161,14 +213,16 @@ function update(){
 
 //Toggles sorting
 function toggle(){
-	sorting = !sorting;
-	if (sorting){
-		startTime = (new Date).getTime();
-		delay = Math.max(Math.min((document.getElementById('delay').value), 10000), 0);
-		document.getElementById('delay').value = delay;
-		timeLimit = Math.max(Math.min((document.getElementById('limit').value), 3600), 0);
-		document.getElementById('limit').value = timeLimit;
-		sort(document.getElementById('type').value);
+	if (mainArr.length > 0){
+		sorting = !sorting;
+		if (sorting){
+			startTime = (new Date).getTime();
+			delay = Math.max(Math.min((document.getElementById('delay').value), 10000), 0);
+			document.getElementById('delay').value = delay;
+			timeLimit = Math.max(Math.min((document.getElementById('limit').value), 3600), 0);
+			document.getElementById('limit').value = timeLimit;
+			sort(document.getElementById('type').value);
+		}
 	}
 }
 
@@ -195,51 +249,74 @@ function sort(type){
 	switch(type){
 		case 'bogoSort':
 		bogoSort(mainArr, 0);
+		updateStat(3, 'Bogosort');
 		break;
 	
 		case 'bubbleSort':
 		bubbleSort(mainArr, 0, 0, false);
+		updateStat(3, 'Bubble sort');
 		break;
 	
 		case 'combSort':
 		combSort(mainArr, 0, 0, false);
+		updateStat(3, 'Comb sort');
 		break;
 	
 		case 'cocktailSort':
 		cocktailSort(mainArr, 0, 0, false);
+		updateStat(3, 'Cocktail sort');
 		break;
 		
 		case 'insertionSort':
 		insertionSort(mainArr, 0, 0);
+		updateStat(3, 'Insertion sort');
 		break;
 		
 		case 'gnomeSort':
 		gnomeSort(mainArr, 0);
+		updateStat(3, 'Gnome sort');
 		break;
 		
 		case 'radixLSDSort':
 		radixLSDSort(mainArr, 0, 0, 0, 0);
+		updateStat(3, 'Radix LSD sort');
 		break;
 	}
 }
 
 //Activates on sort finish
-function sortFinish(str){
+function sortFinish(code, str){
 	sorting = false;
 	update();
-	if (str != null){
+	/*if (str != null && code != 0){
 		alert(str);
+	}*/
+	switch (code){
+		case 0:
+		updateStat(1);
+		break;
+		
+		case 1:
+		updateStat(2, str);
+		break;
+		
+		case 2:
+		updateStat(2, str);
+		break;
+		
+		default:
+		updateStat(2, 'Unknown error');
 	}
 }
 
 //Checks when to terminate sort
 function sortCheck(){
 	if (!sorting){
-			sortFinish();
+			sortFinish(1, 'Stopped by user');
 			return false;
 		}
 		else if (!checkTime()){
-			sortFinish('Time limit exceeded!');
+			sortFinish(2, 'Time limit exceeded');
 			return false;
 		}
 		return true
@@ -258,7 +335,7 @@ function bogoSort(arr, s){
 			setTimeout(function(){bogoSort(arr, (s + 1) % (arr.length - 1));}, delay);
 		}
 	}
-	else {sortFinish();}
+	else {sortFinish(0);}
 }
 
 //Bubble sort
@@ -284,7 +361,7 @@ function bubbleSort(arr, s, r, end){
 			setTimeout(function(){bubbleSort(arr, (s + 1) % (arr.length - r), r0, end0);}, delay);
 		}
 	}
-	else {sortFinish();}
+	else {sortFinish(0);}
 }
 
 //Comb sort
@@ -310,7 +387,7 @@ function combSort(arr, s, r, end){
 			setTimeout(function(){combSort(arr, (s + 1) % (arr.length - g), r0, end0);}, delay);
 		}
 	}
-	else {sortFinish();}
+	else {sortFinish(0);}
 }
 
 //Cocktail sort
@@ -339,7 +416,7 @@ function cocktailSort(arr, s, r, end){
 			setTimeout(function(){cocktailSort(arr, (s + signAlt(r)) % (arr.length - 1), r0, end0);}, delay);
 		}
 	}
-	else {sortFinish();}
+	else {sortFinish(0);}
 }
 
 //Gnome sort
@@ -364,7 +441,7 @@ function gnomeSort(arr, s){
 			}
 		}
 	}
-	else {sortFinish();}
+	else {sortFinish(0);}
 }
 
 //Insertion sort
@@ -393,7 +470,7 @@ function insertionSort(arr, s, r){
 			}
 		}
 	}
-	else {sortFinish();}
+	else {sortFinish(0);}
 }
 
 //Radix LSD sort
@@ -439,5 +516,5 @@ function radixLSDSort(arr, s, r, queue, numLen){
 			setTimeout(function(){radixLSDSort(arr, (s + 1) % (arr.length), r0, queue0, numLen0);}, delay);
 		}
 	}
-	else {sortFinish();}
+	else {sortFinish(0);}
 }

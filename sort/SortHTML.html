@@ -2,9 +2,9 @@
 
 <html>
 
-<title>Sorting algorithms</title>
 
 <head>
+	<title>Sorting algorithms</title>
 	<meta charset="UTF-8">
 	<link href="SortCSS.css" rel="stylesheet" type="text/css">
 </head>
@@ -15,7 +15,7 @@
 
 		<div id="boxTitle" class="ctr">Sorting algorithms</div>
 
-		<div>
+		
 
 		<div id="colorBtn">
 				<input type="button" onclick="colorsUpdate()" value="Color" />
@@ -50,61 +50,73 @@
 						<input id="colorHLS" type="color" value="#ff44ff" />
 					</div>
 				</div>
+		</div>
+	
+		<div id="canvBox">
+			<canvas id="canvas" width="600" height="600"></canvas>
+		</div>
+	
+	
+		<div id="arrBox">
+			<div class="subtitle">
+				Array
 			</div>
+			<div class="param">
+				Length:
+				<input id="arrLen" type="number" name="arrLen" value="99" />
+			</div>
+			<div class="param">
+				Method:
+				<select id="arrMethod" name="arrMethod">
+					<option value="linear">Linear</option>
+					<option value="random">Random</option>
+					<option value="sorted">Sorted</option>
+					<option value="reverse">Reverse</option>
+				</select>
+			</div>
+			<input class="button" type="button" onclick="makeArr()" value="Generate" />
+		</div>
 		
-			<div id="canvBox">
-				<canvas id="canvas" width="600" height="600"></canvas>
+		<div id="sortBox">
+			<div class="subtitle">
+				Sorting
 			</div>
-
-
-			<div id="arrBox">
-				<div class="subtitle">
-					Array
-				</div>
-				<div class="param">
-					Length:
-					<input id="arrLen" type="number" name="arrLen" value="99" />
-				</div>
-				<div class="param">
-					Method:
-					<select id="arrMethod" name="arrMethod">
-						<option value="linear">Linear</option>
-						<option value="random">Random</option>
-						<option value="sorted">Sorted</option>
-						<option value="reverse">Reverse</option>
-					</select>
-				</div>
-				<input class="button" type="button" onclick="makeArr()" value="Generate" />
+			<div class="param">
+				Type:
+				<select id="type" name="type">
+					<option value="bubbleSort">Bubble sort O(n^2)</option>
+					<option value="combSort">Comb sort O(n^2/2^p)</option>
+					<option value="cocktailSort">Cocktail sort O(n^2)</option>
+					<option value="insertionSort">Insertion sort O(n^2)</option>
+					<option value="gnomeSort">Gnome sort O(n^2)</option>
+					<option value="radixLSDSort">Radix LSD sort O(wn)</option>
+					<option value="bogoSort">Bogosort O((n+1)!)</option>
+				</select>
 			</div>
-
-			<div id="sortBox">
-				<div class="subtitle">
-					Sorting
-				</div>
-				<div class="param">
-					Type:
-					<select id="type" name="type">
-						<option value="bubbleSort">Bubble sort O(n^2)</option>
-						<option value="combSort">Comb sort O(n^2/2^p)</option>
-						<option value="cocktailSort">Cocktail sort O(n^2)</option>
-						<option value="insertionSort">Insertion sort O(n^2)</option>
-						<option value="gnomeSort">Gnome sort O(n^2)</option>
-						<option value="radixLSDSort">Radix LSD sort O(wn)</option>
-						<option value="bogoSort">Bogosort O((n+1)!)</option>
-					</select>
-				</div>
-				<div class="param">
-					Delay(ms):
-					<input id="delay" type="number" name="delay" value="0" />
-				</div>
-				<div class="param">
-					Limit(s):
-					<input id="limit" type="number" name="limit" value="3600" />
-				</div>
-				<input class="button" type="button" onclick="toggle()" value="Start/Stop" />
+			<div class="param">
+				Delay(ms):
+				<input id="delay" type="number" name="delay" value="0" />
+			</div>
+			<div class="param">
+				Limit(s):
+				<input id="limit" type="number" name="limit" value="3600" />
+			</div>
+			<input class="button" type="button" onclick="toggle()" value="Start/Stop" />
+		</div>
+		
+		<div id="statBox">
+			<div class="subtitle">
+			Status
 			</div>
 			
+			<div id="statBar">
+			</div>
+			
+			<div id="status" class="param">
+			Idling
+			</div>
 		</div>
+		
 	</div>
 
 </body>
