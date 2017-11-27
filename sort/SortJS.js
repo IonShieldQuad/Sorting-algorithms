@@ -13,6 +13,7 @@ var dim;
 var hl = new Array();
 var hlp = new Array();
 var hls = new Array();
+var cRoot = true;
 
 updateDim();
 
@@ -23,8 +24,8 @@ var fStyle2 = '#f69'; //Dots
 var fStyle3 = '#f44'; //Highlight
 var fStyle4 = '#4f4'; //Highlight alt
 var fStyle5 = '#f4f'; //Highlight special
-var fStyle00 = '#111111';//Bottom left
-var fStyle10 = '#111111';//Bottom right
+var fStyle00 = '#000000';//Bottom left
+var fStyle10 = '#000000';//Bottom right
 var fStyle01 = '#ffffff';//Top left
 var fStyle11 = '#ff6699';//Top right
 
@@ -39,6 +40,10 @@ function colorsUpdate(){
 		fStyle3 = document.getElementById('colorHL').value;
 		fStyle4 = document.getElementById('colorHLP').value;
 		fStyle5 = document.getElementById('colorHLS').value;
+		fStyle00 = document.getElementById('color00').value;
+		fStyle10 = document.getElementById('color10').value;
+		fStyle01 = document.getElementById('color01').value;
+		fStyle11 = document.getElementById('color11').value;
 		colorMenu.style.visibility = 'collapse';
 		update();
 	}
@@ -48,7 +53,7 @@ function colorsUpdate(){
 }
 
 //Interpolates between 2 colors
-function cLerp(c0, c1, a){
+function cLerp(c0, c1, a, root){
 	var r0 = parseInt(c0[1].concat(c0[2]), 16);
 	var g0 = parseInt(c0[3].concat(c0[4]), 16);
 	var b0 = parseInt(c0[5].concat(c0[6]), 16);
@@ -57,12 +62,29 @@ function cLerp(c0, c1, a){
 	var g1 = parseInt(c1[3].concat(c1[4]), 16);
 	var b1 = parseInt(c1[5].concat(c1[6]), 16);
 	
-	var r = (1 - a) * r0 + a *r1;
-	var g = (1 - a) * g0 + a *g1;
-	var b = (1 - a) * b0 + a *b1;
-	
-	var c = '#' + Math.round(r).toString(16) + Math.round(g).toString(16) + Math.round(b).toString(16);
-	console.log(c);
+	if (root === true){
+		var r = Math.sqrt((1 - a) * Math.pow(r0, 2) + a *Math.pow(r1, 2));
+		var g = Math.sqrt((1 - a) * Math.pow(g0, 2) + a *Math.pow(g1, 2));
+		var b = Math.sqrt((1 - a) * Math.pow(b0, 2) + a *Math.pow(b1, 2));
+	}
+	else {
+		var r = (1 - a) * r0 + a *r1;
+		var g = (1 - a) * g0 + a *g1;
+		var b = (1 - a) * b0 + a *b1;
+	}
+	var c = '#';
+	if (Math.round(r) < 16){
+		c += '0';
+	}
+	c += Math.round(r).toString(16);
+	if (Math.round(g) < 16){
+		c += '0';
+	}
+	c += Math.round(g).toString(16);
+	if (Math.round(b) < 16){
+		c += '0';
+	}
+	c += Math.round(b).toString(16);
 	return c;
 }
 
@@ -163,6 +185,18 @@ function shuffle (arr){
 	}
 }
 
+//Transponates 2d array
+function transArr(arr){
+	tempArr = new Array();
+		for (var i = 0; i < arr.length; i++){
+			tempArr[i] = new Array();
+			for (var j = 0; j < arr[i].length; j++){
+				tempArr[i][j] = arr[j][i];
+			}
+		}
+	return tempArr;
+}
+
 //Sets to highlight an index
 function highlight (val, p){
 	if (p != null){
@@ -219,16 +253,19 @@ function makeArr(){
 		break;
 		
 		case 2:
-		for(var i = 0; i < arrLen; i++){
+		for (var i = 0; i < arrLen; i++){
 			mainArr[i] = new Array();
 			var arrLine = new Array();
 			arrLine = genArr(arrLen, 'linear');
 			for (var j = 0; j < arrLine.length; j++){
 				mainArr[i][j] = [i, arrLine[j]];
 			}
+		}
+		mainArr = transArr(mainArr);
+		for (var i = 0; i < arrLen; i++){
 			shuffle(mainArr[i]);
 		}
-		shuffle(mainArr);
+		mainArr = transArr(mainArr);
 		break;
 	}
 	update();
@@ -331,7 +368,7 @@ function update2d(){
 	
 	for (i = 0; i < arrLen; i++){ //Draws a box
 		for (j = 0; j < arrLen; j++){
-			ctx.fillStyle = cLerp(cLerp(fStyle00, fStyle10, mainArr[i][j][0] / arrLen), cLerp(fStyle01, fStyle11, mainArr[i][j][0] / arrLen), mainArr[i][j][1] / arrLen);
+			ctx.fillStyle = cLerp(cLerp(fStyle00, fStyle10, mainArr[i][j][0] / arrLen, cRoot), cLerp(fStyle01, fStyle11, mainArr[i][j][0] / arrLen, cRoot), mainArr[i][j][1] / arrLen, cRoot);
 			ctx.fillRect(i * delta, size - j * delta, delta, -delta);
 		}
 	}
