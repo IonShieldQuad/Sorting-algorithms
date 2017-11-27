@@ -16,7 +16,7 @@ div#box {
 	background-color: #bbb;
 	min-width: 1150px;
 	max-width: 1150px;
-	min-height: 1000px;
+	min-height: 1100px;
 }
 
 div#boxTitle {
@@ -204,7 +204,7 @@ div.subtitle {
 	margin: 5px 0px 10px 0px;
 	padding: 5px;
 	color: #649;
-	font-size: 36px;
+	font-size: 32px;
 	vertical-align: middle;
 	text-align: center;
 }
@@ -216,7 +216,7 @@ div.param {
 	margin: 10px 20px 10px 0px;
 	padding: 5px;
 	color: #222;
-	font-size: 18px;
+	font-size: 16px;
 	vertical-align: middle;
 	text-align: justify;
 }
@@ -228,7 +228,7 @@ select, input, button {
 	font-family: 'Trebuchet MS', sans-serif;
 }
 
-div.param select, div.param input {
+div.param select, div.param input[type = number] {
 	background-color: #ddd;
 	border: 2px solid #649;
 	border-radius: 2px;
@@ -254,14 +254,34 @@ input.button {
 	transition: color 0.1s, box-shadow 0.1s, border 0.1s, background-color 0.1s, font-size 0.1s;
 }
 
-div.param select:hover, div.param input:hover {
+div.param select:hover, div.param input[type = number]:hover {
 	border-color: #f69;
 }
 
-div.param select:focus, div.param input:focus {
+div.param select:focus, div.param input[type = number]:focus {
 	border-color: #f69;
 	background-color: #fbc;
 	color: #222;
+}
+
+div.param input[type = radio] {
+	border: 2px solid #649;
+	border-radius: 40%;
+	transition: border 0.3s, background-color 0.3s;
+	width: 16px;
+	height: 16px;
+	background-color: #ddd;
+	vertical-align: middle;
+}
+
+div.param input[type = radio]:checked {
+	border-width: 8px;
+	background-color: #f69;
+}
+
+div.param input[type = radio]:hover {
+	background-color: #fbc;
+	border-color: #f69;
 }
 
 input.button:hover {
@@ -278,4 +298,10 @@ input.button:active {
 	box-shadow: 3px 3px 3px 0px #222 inset;
 	color: #c46;
 	font-size: 28px;
+}
+
+.param select:disabled {
+	color: #444;
+	background-color: #888;
+	border-color: #aaa;
 }

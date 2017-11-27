@@ -1,6 +1,5 @@
 
 //Declare variables
-var i;
 var mainArr = new Array();
 var arrLen = 0;
 var canvas = document.getElementById('canvas');
@@ -10,9 +9,12 @@ var startTime;
 var delay;
 var animHdl;
 var animOffset = 0;
+var dim;
 var hl = new Array();
 var hlp = new Array();
 var hls = new Array();
+
+updateDim();
 
 //Styles
 var fStyle0 = '#444'; //Background
@@ -21,6 +23,11 @@ var fStyle2 = '#f69'; //Dots
 var fStyle3 = '#f44'; //Highlight
 var fStyle4 = '#4f4'; //Highlight alt
 var fStyle5 = '#f4f'; //Highlight special
+var fStyle00 = '#111111';//Bottom left
+var fStyle10 = '#111111';//Bottom right
+var fStyle01 = '#ffffff';//Top left
+var fStyle11 = '#ff6699';//Top right
+
 
 //Updates colors from menu
 function colorsUpdate(){
@@ -40,15 +47,56 @@ function colorsUpdate(){
 	}
 }
 
+//Interpolates between 2 colors
+function cLerp(c0, c1, a){
+	var r0 = parseInt(c0[1].concat(c0[2]), 16);
+	var g0 = parseInt(c0[3].concat(c0[4]), 16);
+	var b0 = parseInt(c0[5].concat(c0[6]), 16);
+	
+	var r1 = parseInt(c1[1].concat(c1[2]), 16);
+	var g1 = parseInt(c1[3].concat(c1[4]), 16);
+	var b1 = parseInt(c1[5].concat(c1[6]), 16);
+	
+	var r = (1 - a) * r0 + a *r1;
+	var g = (1 - a) * g0 + a *g1;
+	var b = (1 - a) * b0 + a *b1;
+	
+	var c = '#' + Math.round(r).toString(16) + Math.round(g).toString(16) + Math.round(b).toString(16);
+	console.log(c);
+	return c;
+}
+
+//Switches between 1d and 2d
+function updateDim(){
+	var radioVal = document.querySelector('input[name="dimensions"]:checked').value;
+	var selector = document.getElementById('arrMethod');
+	switch (radioVal){
+		case '1d':
+		dim = 1;
+		selector.disabled = false;
+		break;
+		
+		case '2d':
+		dim = 2;
+		selector.disabled = true;
+		selector.value = 'linear';
+		break;
+	}
+}
+
 //Updates status box
 function updateStat(key, str){
 	var statBar = document.getElementById('statBar');
 	var statText = document.getElementById('status');
 	var barStyle0 = '#232'; //Idle
-	var barStyle1 = '#2fd'; //Finished
+	var barStyle1 = '#2f2'; //Finished
 	var barStyle2 = '#f42'; //Error
-	var barStyle3 = '#222'; //Running 0
-	var barStyle4 = '#2f2'; //Running 1
+	var barStyle3 = '#888'; //Running 0
+	var barStyle4 = '#8f2'; //Running 1
+	if (key != 3){
+		animOffset = -1;
+		clearInterval(animHdl);
+	}
 	switch (key){
 		case 0:
 		statBar.style.background = barStyle0;
@@ -67,13 +115,10 @@ function updateStat(key, str){
 		
 		case 3:
 		statBar.style.background = ('linear-gradient(to right, '+ barStyle3 +'0%,'+ barStyle4 +'50%,'+ barStyle3 +'100%)');
-		statText.innerHTML = 'Sorting with ' + str;
-		animHdl = setInterval(function(){animTick(statBar, barStyle3, barStyle4)}, 100);
+		statText.innerHTML = 'Sorting using: ' + str;
+		animHdl = setInterval(function(){animTick(statBar, barStyle3, barStyle4)}, 20);
 		animOffset = 0;
 		break;
-	}
-	if (key != 3){
-		animOffset = -1;
 	}
 }
 
@@ -84,7 +129,7 @@ function animTick(ref, s0, s1){
 	}
 	else {
 		ref.style.background = ('linear-gradient(to right, '+s0+' '+(animOffset-100)%200+'%,'+s1+' '+(animOffset-50)%200+'%,'+s0+' '+animOffset%200+'%,'+s1+' '+(animOffset+50)%200+'%,'+s0+' '+(animOffset+100)%200+'%)');
-		animOffset += 10;
+		animOffset += 8;
 		animOffset %= 100;
 	}
 }
@@ -112,7 +157,7 @@ function swap(arr, i1, i2){
 //Shuffles array
 function shuffle (arr){
 	var j;
-	for (i=0; i<=arr.length-2; i++){
+	for (var i=0; i<=arr.length-2; i++){
 		j = getRandomInt(i, arr.length-1);
 		swap(arr, i, j);
 	}
@@ -139,45 +184,107 @@ function highlight (val, p){
 	}
 }
 
-//Generates randomized array
+//Sets to highlight an index in 2d
+function highlight2d (valX, valY, p){
+	if (p != null){
+		switch (p){
+			case 1:
+			hlp[hlp.length] = [valX, valY];
+			break;
+			
+			case 2:
+			hls[hls.length] = [valX, valY];
+			break;
+			
+			default:
+			hl[hl.length] = [valX, valY];
+		}
+	}
+	else {
+		hl[hl.length] = [valX, valY];
+	}
+}
+
+//Handles "Generate" button
 function makeArr(){
 	sorting = false;
 	mainArr.length = 0;
 	arrLen = Math.max(Math.min(document.getElementById('arrLen').value, 10000), 0);
 	document.getElementById('arrLen').value = arrLen;
-	switch(document.getElementById('arrMethod').value){
-		case 'linear':
-		for (i = 0; i < arrLen; i++){
-			mainArr[i] = i + 1;
+	var arrMethod = document.getElementById('arrMethod').value;
+	
+	switch (dim){
+		case 1:
+		mainArr = genArr(arrLen, arrMethod);
+		break;
+		
+		case 2:
+		for(var i = 0; i < arrLen; i++){
+			mainArr[i] = new Array();
+			var arrLine = new Array();
+			arrLine = genArr(arrLen, 'linear');
+			for (var j = 0; j < arrLine.length; j++){
+				mainArr[i][j] = [i, arrLine[j]];
+			}
+			shuffle(mainArr[i]);
 		}
 		shuffle(mainArr);
-		break;
-		
-		case 'random':
-		for (i = 0; i < arrLen; i++){
-			mainArr[i] = getRandomInt(1, arrLen);
-		}
-		shuffle(mainArr);
-		break;
-		
-		case 'sorted':
-		for (i = 0; i < arrLen; i++){
-			mainArr[i] = i + 1;
-		}
-		break;
-		
-		case 'reverse':
-		for (i = 0; i < arrLen; i++){
-			mainArr[i] = arrLen - i;
-		}
 		break;
 	}
 	update();
 	updateStat(0);
 }
 
-//Updates canvas
+//Generates randomized array
+function genArr(len, method){
+	var i;
+	var arr = new Array();
+	switch(method){
+		case 'linear':
+		for (i = 0; i < len; i++){
+			arr[i] = i + 1;
+		}
+		shuffle(arr);
+		break;
+		
+		case 'random':
+		for (i = 0; i < len; i++){
+			arr[i] = getRandomInt(1, arrLen);
+		}
+		shuffle(arr);
+		break;
+		
+		case 'sorted':
+		for (i = 0; i < len; i++){
+			arr[i] = i + 1;
+		}
+		break;
+		
+		case 'reverse':
+		for (i = 0; i < len; i++){
+			arr[i] = arrLen - i;
+		}
+		break;
+	}
+	return arr;
+}
+
+//Handles updating
 function update(){
+	switch(dim){
+		case 1:
+		update1d();
+		break;
+		
+		case 2:
+		update2d();
+		break;
+	}
+}
+
+//Updates canvas
+function update1d(){
+	var i;
 	var size = Math.min(canvas.width, canvas.height);
 	var delta = size / arrLen;
 	var ctx = canvas.getContext("2d");
@@ -203,6 +310,43 @@ function update(){
 	for (i = 0; i < hls.length; i++) {
 		ctx.fillStyle = fStyle5;
 		ctx.fillRect(hls[i] * delta, size, delta, - (delta * mainArr[hls[i]]));
+	}
+	ctx.stroke();
+	//Resets highlight
+	hl.length = 0;
+	hlp.length = 0;
+	hls.length = 0;
+}
+
+//Updates canvas 2d
+function update2d(){
+	var i;
+	var j;
+	var size = Math.min(canvas.width, canvas.height);
+	var delta = size / arrLen;
+	var ctx = canvas.getContext("2d");
+	
+	ctx.fillStyle = fStyle0;
+	ctx.fillRect(0, 0, size, size); //Clears canvas
+	
+	for (i = 0; i < arrLen; i++){ //Draws a box
+		for (j = 0; j < arrLen; j++){
+			ctx.fillStyle = cLerp(cLerp(fStyle00, fStyle10, mainArr[i][j][0] / arrLen), cLerp(fStyle01, fStyle11, mainArr[i][j][0] / arrLen), mainArr[i][j][1] / arrLen);
+			ctx.fillRect(i * delta, size - j * delta, delta, -delta);
+		}
+	}
+	//Highlights selected indexes
+	for (i = 0; i < hl.length; i++) {
+		ctx.fillStyle = fStyle3;
+		ctx.fillRect(hl[i][0] * delta, size - hl[i][1] * delta, delta, - (delta * mainArr[hl[i]]));
+	}
+	for (i = 0; i < hlp.length; i++) {
+		ctx.fillStyle = fStyle4;
+		ctx.fillRect(hlp[i][0] * delta, size - hlp[i][1] * delta, delta, - (delta * mainArr[hlp[i]]));
+	}
+	for (i = 0; i < hls.length; i++) {
+		ctx.fillStyle = fStyle5;
+		ctx.fillRect(hls[i][0] * delta, size - hls[i][1] * delta, delta, - (delta * mainArr[hls[i]]));
 	}
 	ctx.stroke();
 	//Resets highlight
@@ -246,40 +390,44 @@ function isSorted(arr){
 
 //Activates sort based on value
 function sort(type){
-	switch(type){
-		case 'bogoSort':
-		bogoSort(mainArr, 0);
-		updateStat(3, 'Bogosort');
-		break;
+	switch(dim){
+		case 1:
+		switch(type){
+			case 'bogoSort':
+			bogoSort(mainArr, 0);
+			updateStat(3, 'Bogosort');
+			break;
 	
-		case 'bubbleSort':
-		bubbleSort(mainArr, 0, 0, false);
-		updateStat(3, 'Bubble sort');
-		break;
+			case 'bubbleSort':
+			bubbleSort(mainArr, 0, 0, false);
+			updateStat(3, 'Bubble sort');
+			break;
 	
-		case 'combSort':
-		combSort(mainArr, 0, 0, false);
-		updateStat(3, 'Comb sort');
-		break;
+			case 'combSort':
+			combSort(mainArr, 0, 0, false);
+			updateStat(3, 'Comb sort');
+			break;
 	
-		case 'cocktailSort':
-		cocktailSort(mainArr, 0, 0, false);
-		updateStat(3, 'Cocktail sort');
-		break;
+			case 'cocktailSort':
+			cocktailSort(mainArr, 0, 0, false);
+			updateStat(3, 'Cocktail sort');
+			break;
 		
-		case 'insertionSort':
-		insertionSort(mainArr, 0, 0);
-		updateStat(3, 'Insertion sort');
-		break;
+			case 'insertionSort':
+			insertionSort(mainArr, 0, 0);
+			updateStat(3, 'Insertion sort');
+			break;
 		
-		case 'gnomeSort':
-		gnomeSort(mainArr, 0);
-		updateStat(3, 'Gnome sort');
-		break;
+			case 'gnomeSort':
+			gnomeSort(mainArr, 0);
+			updateStat(3, 'Gnome sort');
+			break;
 		
-		case 'radixLSDSort':
-		radixLSDSort(mainArr, 0, 0, 0, 0);
-		updateStat(3, 'Radix LSD sort');
+			case 'radixLSDSort':
+			radixLSDSort(mainArr, 0, 0, 0, 0);
+			updateStat(3, 'Radix LSD sort');
+			break;
+		}
 		break;
 	}
 }
@@ -323,16 +471,23 @@ function sortCheck(){
 }
 
 //Bogosort
-function bogoSort(arr, s){
-	if (!isSorted(arr)){
+function bogoSort(arr, s, end){
+	if (!(end && s == 0)){
+		var end0 = end;
 		//Shuffle
 		var j = getRandomInt(s, arr.length-1);
 		swap(arr, s, j);
 		highlight(s);
 		highlight(j);
 		update();
+		if (arr[s] < arr[s-1]){
+			end0 = false;
+		}
+		if (s == 0) {
+			end0 = true;
+		}
 		if (sortCheck()){
-			setTimeout(function(){bogoSort(arr, (s + 1) % (arr.length - 1));}, delay);
+			setTimeout(function(){bogoSort(arr, (s + 1) % (arr.length), end0);}, delay);
 		}
 	}
 	else {sortFinish(0);}
