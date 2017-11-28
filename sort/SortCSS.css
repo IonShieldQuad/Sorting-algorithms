@@ -72,6 +72,20 @@ div#statBox {
 	max-height: 600px;
 }
 
+div#optionBox {
+	float: right;
+	clear: right;
+	border: 2px solid #649;
+	border-radius: 5px;
+	padding: 10px;
+	margin: 5px 50px 10px 10px;
+	background-color: #ccc;
+	min-width: 250px;
+	max-width: 320px;
+	min-height: 100px;
+	max-height: 600px;
+}
+
 div#statBar {
 	width: 100%;
 	height: 10px;
@@ -221,7 +235,7 @@ div.param {
 	text-align: justify;
 }
 
-select, input, button {
+select, input {
 	-moz-appearance: none;
 	-webkit-appearance: none;
 	appearance: none;
@@ -266,7 +280,7 @@ div.param select:focus, div.param input[type = number]:focus {
 
 div.param input[type = radio] {
 	border: 2px solid #649;
-	border-radius: 40%;
+	border-radius: 50%;
 	transition: border 0.3s, background-color 0.3s;
 	width: 16px;
 	height: 16px;
@@ -276,10 +290,33 @@ div.param input[type = radio] {
 
 div.param input[type = radio]:checked {
 	border-width: 8px;
-	background-color: #f69;
+	background-color: #96b;
+	border-style: double;
 }
 
 div.param input[type = radio]:hover {
+	background-color: #fbc;
+	border-color: #f69;
+}
+
+div.param input[type = checkbox] {
+	border: 2px solid #649;
+	border-radius: 30%;
+	transition: border 0.3s, background-color 0.3s, transform 1s;
+	width: 16px;
+	height: 16px;
+	background-color: #ddd;
+	vertical-align: middle;
+}
+
+div.param input[type = checkbox]:checked {
+	border-width: 3px;
+	border-style: solid;
+	background-color: #f69;
+	transform: rotate(90deg);
+}
+
+div.param input[type = checkbox]:hover {
 	background-color: #fbc;
 	border-color: #f69;
 }

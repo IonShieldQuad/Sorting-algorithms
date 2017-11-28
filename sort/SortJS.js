@@ -1,33 +1,33 @@
 
 //Declare variables
-var mainArr = new Array();
-var arrLen = 0;
-var canvas = document.getElementById('canvas');
-var sorting = 0;
-var timeLimit = 60;
-var startTime;
-var delay;
-var animHdl;
-var animOffset = 0;
-var dim;
-var hl = new Array();
-var hlp = new Array();
-var hls = new Array();
-var cRoot = true;
-
-updateDim();
+var mainArr = new Array();						//Main array
+var arrLen = 0;									//Length of main array
+var canvas = document.getElementById('canvas');	//Canvas element
+var sorting = false;							//Is sorting algorithm on?
+var timeLimit = 60;								//Time limit before termination
+var startTime;									//Time at the statr of sorting
+var delay;										//Delay between updates
+var animHdl;									//Animation timer handle
+var animOffset = 0;								//Offset, used for animation
+var dim;										//Nomber of dimensions, 1d or 2d
+var nLine2d;									//Number of sorting line in 2d	
+var hl = new Array();							//Array of indexes to highlight
+var hlp = new Array();							//Array of indexes to highlight - alternate
+var hls = new Array();							//Array of indexes to highlight - special
+var cCorr = 2;									//Color correction factor
+var fastDraw = true;							//Use faster drawing mode?
 
 //Styles
-var fStyle0 = '#444'; //Background
-var fStyle1 = '#ddd'; //Bars
-var fStyle2 = '#f69'; //Dots
-var fStyle3 = '#f44'; //Highlight
-var fStyle4 = '#4f4'; //Highlight alt
-var fStyle5 = '#f4f'; //Highlight special
-var fStyle00 = '#000000';//Bottom left
-var fStyle10 = '#000000';//Bottom right
-var fStyle01 = '#ffffff';//Top left
-var fStyle11 = '#ff6699';//Top right
+var fStyle0 = '#444'; 		//Background
+var fStyle1 = '#ddd'; 		//Bars
+var fStyle2 = '#f69'; 		//Dots
+var fStyle3 = '#f44'; 		//Highlight
+var fStyle4 = '#4f4'; 		//Highlight alt
+var fStyle5 = '#f4f'; 		//Highlight special
+var fStyle00 = '#000000';	//Bottom left
+var fStyle10 = '#000000';	//Bottom right
+var fStyle01 = '#ffffff';	//Top left
+var fStyle11 = '#ff6699';	//Top right
 
 
 //Updates colors from menu
@@ -53,7 +53,7 @@ function colorsUpdate(){
 }
 
 //Interpolates between 2 colors
-function cLerp(c0, c1, a, root){
+function cLerp(c0, c1, a, corr){
 	var r0 = parseInt(c0[1].concat(c0[2]), 16);
 	var g0 = parseInt(c0[3].concat(c0[4]), 16);
 	var b0 = parseInt(c0[5].concat(c0[6]), 16);
@@ -62,15 +62,15 @@ function cLerp(c0, c1, a, root){
 	var g1 = parseInt(c1[3].concat(c1[4]), 16);
 	var b1 = parseInt(c1[5].concat(c1[6]), 16);
 	
-	if (root === true){
-		var r = Math.sqrt((1 - a) * Math.pow(r0, 2) + a *Math.pow(r1, 2));
-		var g = Math.sqrt((1 - a) * Math.pow(g0, 2) + a *Math.pow(g1, 2));
-		var b = Math.sqrt((1 - a) * Math.pow(b0, 2) + a *Math.pow(b1, 2));
+	if (corr != null){
+		var r = Math.pow((1 - a) * Math.pow(r0, corr) + a * Math.pow(r1, corr), 1 / corr);
+		var g = Math.pow((1 - a) * Math.pow(g0, corr) + a * Math.pow(g1, corr), 1 / corr);
+		var b = Math.pow((1 - a) * Math.pow(b0, corr) + a * Math.pow(b1, corr), 1 / corr);
 	}
 	else {
-		var r = (1 - a) * r0 + a *r1;
-		var g = (1 - a) * g0 + a *g1;
-		var b = (1 - a) * b0 + a *b1;
+		var r = (1 - a) * r0 + a * r1;
+		var g = (1 - a) * g0 + a * g1;
+		var b = (1 - a) * b0 + a * b1;
 	}
 	var c = '#';
 	if (Math.round(r) < 16){
@@ -92,16 +92,19 @@ function cLerp(c0, c1, a, root){
 function updateDim(){
 	var radioVal = document.querySelector('input[name="dimensions"]:checked').value;
 	var selector = document.getElementById('arrMethod');
+	var option = document.querySelector('option[value="random"]');
 	switch (radioVal){
 		case '1d':
 		dim = 1;
-		selector.disabled = false;
+		option.disabled = false;
 		break;
 		
 		case '2d':
 		dim = 2;
-		selector.disabled = true;
-		selector.value = 'linear';
+		option.disabled = true;
+		if (selector.value == 'random'){
+			selector.value = 'linear';
+		}
 		break;
 	}
 }
@@ -202,19 +205,19 @@ function highlight (val, p){
 	if (p != null){
 		switch (p){
 			case 1:
-			hlp[hlp.length] = val;
+			hlp[hlp.length] = [val, 1];
 			break;
 			
 			case 2:
-			hls[hls.length] = val;
+			hls[hls.length] = [val, 1];
 			break;
 			
 			default:
-			hl[hl.length] = val;
+			hl[hl.length] = [val, 1];
 		}
 	}
 	else {
-		hl[hl.length] = val;
+		hl[hl.length] = [val, 1];
 	}
 }
 
@@ -223,19 +226,19 @@ function highlight2d (valX, valY, p){
 	if (p != null){
 		switch (p){
 			case 1:
-			hlp[hlp.length] = [valX, valY];
+			hlp[hlp.length] = [valX, valY, 1];
 			break;
 			
 			case 2:
-			hls[hls.length] = [valX, valY];
+			hls[hls.length] = [valX, valY, 1];
 			break;
 			
 			default:
-			hl[hl.length] = [valX, valY];
+			hl[hl.length] = [valX, valY, 1];
 		}
 	}
 	else {
-		hl[hl.length] = [valX, valY];
+		hl[hl.length] = [valX, valY, 1];
 	}
 }
 
@@ -256,16 +259,18 @@ function makeArr(){
 		for (var i = 0; i < arrLen; i++){
 			mainArr[i] = new Array();
 			var arrLine = new Array();
-			arrLine = genArr(arrLen, 'linear');
+			arrLine = genArr(arrLen, arrMethod);
 			for (var j = 0; j < arrLine.length; j++){
-				mainArr[i][j] = [i, arrLine[j]];
+				mainArr[i][j] = [i, arrLine[j]-1];
 			}
 		}
-		mainArr = transArr(mainArr);
-		for (var i = 0; i < arrLen; i++){
-			shuffle(mainArr[i]);
+		if ((arrMethod != 'sorted') && (arrMethod != 'reverse')){
+			mainArr = transArr(mainArr);
+			for (var i = 0; i < arrLen; i++){
+				shuffle(mainArr[i]);
+			}
+			mainArr = transArr(mainArr);
 		}
-		mainArr = transArr(mainArr);
 		break;
 	}
 	update();
@@ -307,71 +312,136 @@ function genArr(len, method){
 }
 
 //Handles updating
-function update(){
+function update(arr){
 	switch(dim){
 		case 1:
-		update1d();
+		update1d(arr);
 		break;
 		
 		case 2:
-		update2d();
+		update2d(arr);
 		break;
 	}
 }
 
 //Updates canvas
-function update1d(){
+function update1d(arr){
 	var i;
 	var size = Math.min(canvas.width, canvas.height);
 	var delta = size / arrLen;
 	var ctx = canvas.getContext("2d");
 	
-	ctx.fillStyle = fStyle0;
-	ctx.fillRect(0, 0, size, size); //Clears canvas
-	
-	for (i = 0; i < arrLen; i++){ //Draws a column
-		ctx.fillStyle = fStyle1;
-		ctx.fillRect(i * delta, size, delta, - (delta * (mainArr[i]) - 1));
-		ctx.fillStyle = fStyle2;
-		ctx.fillRect(i * delta, size - (delta * (mainArr[i])), delta, delta);
+	if (arr == null){
+		indexes = mainArr;
 	}
+	else {
+		indexes = arr;
+	}
+	
+	if (arr == null || !fastDraw){
+		ctx.fillStyle = fStyle0;
+		ctx.fillRect(0, 0, size, size); //Clears canvas
+		
+		for (i = 0; i < arrLen; i++){ //Draws a column
+			ctx.fillStyle = fStyle1;
+			ctx.fillRect(i * delta, size, delta, - (delta * (mainArr[i]) - 1));
+			ctx.fillStyle = fStyle2;
+			ctx.fillRect(i * delta, size - (delta * (mainArr[i])), delta, delta);
+		}
+	}
+	else {
+		for (i = 0; i < arr.length; i++){
+			ctx.fillStyle = fStyle0;
+			ctx.fillRect(arr[i] * delta, 0, delta, size); //Clears column
+			
+			ctx.fillStyle = fStyle1;
+			ctx.fillRect(arr[i] * delta, size, delta, - (delta * (mainArr[arr[i]]) - 1));
+			ctx.fillStyle = fStyle2;
+			ctx.fillRect(arr[i] * delta, size - (delta * (mainArr[arr[i]])), delta, delta);
+		}	
+	}	
+		
 	//Highlights selected indexes
 	for (i = 0; i < hl.length; i++) {
-		ctx.fillStyle = fStyle3;
-		ctx.fillRect(hl[i] * delta, size, delta, - (delta * mainArr[hl[i]]));
+		if (hl[i][1] == 1){
+			ctx.fillStyle = fStyle3;
+			ctx.fillRect(hl[i][0] * delta, size, delta, - (delta * mainArr[hl[i][0]]));
+			hl[i][1] = 0;
+		}
+		else {
+			ctx.fillStyle = fStyle1;
+			ctx.fillRect(hl[i][0] * delta, size, delta, - (delta * (mainArr[hl[i][0]]) - 1));
+			ctx.fillStyle = fStyle2;
+			ctx.fillRect(hl[i][0] * delta, size - (delta * (mainArr[hl[i][0]])), delta, delta);
+			hl.splice(i--, 1);
+		}
 	}
 	for (i = 0; i < hlp.length; i++) {
-		ctx.fillStyle = fStyle4;
-		ctx.fillRect(hlp[i] * delta, size, delta, - (delta * mainArr[hlp[i]]));
+		if (hlp[i][1] == 1){
+			ctx.fillStyle = fStyle4;
+			ctx.fillRect(hlp[i][0] * delta, size, delta, - (delta * mainArr[hlp[i][0]]));
+			hlp[i][1] = 0;
+		}
+		else {
+			ctx.fillStyle = fStyle1;
+			ctx.fillRect(hlp[i][0] * delta, size, delta, - (delta * (mainArr[hlp[i][0]]) - 1));
+			ctx.fillStyle = fStyle2;
+			ctx.fillRect(hlp[i][0] * delta, size - (delta * (mainArr[hlp[i][0]])), delta, delta);
+			hlp.splice(i--, 1);
+		}
 	}
 	for (i = 0; i < hls.length; i++) {
-		ctx.fillStyle = fStyle5;
-		ctx.fillRect(hls[i] * delta, size, delta, - (delta * mainArr[hls[i]]));
+		if (hls[i][1] == 1){
+			ctx.fillStyle = fStyle5;
+			ctx.fillRect(hls[i][0] * delta, size, delta, - (delta * mainArr[hls[i][0]]));
+			hls[i][1] = 0;
+		}
+		else {
+			ctx.fillStyle = fStyle1;
+			ctx.fillRect(hls[i][0] * delta, size, delta, - (delta * (mainArr[hls[i][0]]) - 1));
+			ctx.fillStyle = fStyle2;
+			ctx.fillRect(hls[i][0] * delta, size - (delta * (mainArr[hls[i][0]])), delta, delta);
+			hls.splice(i--, 1);
+		}
 	}
 	ctx.stroke();
 	//Resets highlight
-	hl.length = 0;
-	hlp.length = 0;
-	hls.length = 0;
+	//hl.length = 0;
+	//hlp.length = 0;
+	//hls.length = 0;
 }
 
 //Updates canvas 2d
-function update2d(){
+function update2d(arr){
 	var i;
 	var j;
 	var size = Math.min(canvas.width, canvas.height);
 	var delta = size / arrLen;
 	var ctx = canvas.getContext("2d");
+	cCorr = document.getElementById('cCorr').value;
 	
-	ctx.fillStyle = fStyle0;
-	ctx.fillRect(0, 0, size, size); //Clears canvas
-	
-	for (i = 0; i < arrLen; i++){ //Draws a box
-		for (j = 0; j < arrLen; j++){
-			ctx.fillStyle = cLerp(cLerp(fStyle00, fStyle10, mainArr[i][j][0] / arrLen, cRoot), cLerp(fStyle01, fStyle11, mainArr[i][j][0] / arrLen, cRoot), mainArr[i][j][1] / arrLen, cRoot);
-			ctx.fillRect(i * delta, size - j * delta, delta, -delta);
+	if (arr == null || !fastDraw){
+		ctx.fillStyle = fStyle0;
+		ctx.fillRect(0, 0, size, size); //Clears canvas
+		
+		
+		for (i = 0; i < arrLen; i++){ //Draws a box
+			for (j = 0; j < arrLen; j++){
+				ctx.fillStyle = cLerp(cLerp(fStyle00, fStyle10, (mainArr[i][j][0]) / (arrLen-1), cCorr), cLerp(fStyle01, fStyle11, (mainArr[i][j][0]) / (arrLen-1), cCorr), (mainArr[i][j][1]) / (arrLen-1), cCorr);
+				ctx.fillRect(i * delta, size - j * delta, delta, -delta);
+			}
 		}
 	}
+	else {
+		ctx.fillStyle = fStyle0;
+		ctx.fillRect(arr[i][0] * delta, arr[i][1] * delta, delta, delta); //Clears canvas
+		
+		for (i = 0; i < arr.length; i++){ //Draws a box
+			ctx.fillStyle = cLerp(cLerp(fStyle00, fStyle10, (mainArr[arr[i][0]][arr[i][1]][0]) / (arrLen-1), cCorr), cLerp(fStyle01, fStyle11, (mainArr[arr[i][0]][arr[i][1]][0]) / (arrLen-1), cCorr), (mainArr[arr[i][0]][arr[i][1]][1]) / (arrLen-1), cCorr);
+			ctx.fillRect(arr[i][0] * delta, size - arr[i][1] * delta, delta, -delta);
+		}
+	}
+	
 	//Highlights selected indexes
 	for (i = 0; i < hl.length; i++) {
 		ctx.fillStyle = fStyle3;
@@ -402,6 +472,9 @@ function toggle(){
 			document.getElementById('delay').value = delay;
 			timeLimit = Math.max(Math.min((document.getElementById('limit').value), 3600), 0);
 			document.getElementById('limit').value = timeLimit;
+			
+			fastDraw = document.getElementById('fastDraw').checked;
+			
 			sort(document.getElementById('type').value);
 		}
 	}
@@ -473,9 +546,6 @@ function sort(type){
 function sortFinish(code, str){
 	sorting = false;
 	update();
-	/*if (str != null && code != 0){
-		alert(str);
-	}*/
 	switch (code){
 		case 0:
 		updateStat(1);
@@ -516,7 +586,7 @@ function bogoSort(arr, s, end){
 		swap(arr, s, j);
 		highlight(s);
 		highlight(j);
-		update();
+		update(s-1, s, s+1, j-1, j, j+1);
 		if (arr[s] < arr[s-1]){
 			end0 = false;
 		}
@@ -549,7 +619,7 @@ function bubbleSort(arr, s, r, end){
 			r0++;
 			end0 = true;
 		}
-		if (sortCheck()){
+		if (sortCheck([s-1 ,s, s+1, s+2])){
 			setTimeout(function(){bubbleSort(arr, (s + 1) % (arr.length - r), r0, end0);}, delay);
 		}
 	}
@@ -574,7 +644,7 @@ function combSort(arr, s, r, end){
 		}
 		highlight(s);
 		highlight(s + g);
-		update();
+		update([s-1 ,s, s+1, s+g-1, s+g, s+g+1]);
 		if (sortCheck()){
 			setTimeout(function(){combSort(arr, (s + 1) % (arr.length - g), r0, end0);}, delay);
 		}
@@ -603,7 +673,7 @@ function cocktailSort(arr, s, r, end){
 		highlight(s+1);
 		highlight(Math.floor(r/2)-1, 2);
 		highlight(arr.length - Math.ceil(r/2), 2);
-		update();
+		update([s, s+1]);
 		if (sortCheck()){
 			setTimeout(function(){cocktailSort(arr, (s + signAlt(r)) % (arr.length - 1), r0, end0);}, delay);
 		}
@@ -623,7 +693,7 @@ function gnomeSort(arr, s){
 		}
 		highlight(s);
 		highlight(s+1);
-		update();
+		update([s-1 ,s, s+1, s+2]);
 		if (sortCheck()){
 			if (!b){
 				setTimeout(function(){gnomeSort(arr, (s + 1) % (arr.length));}, delay);
@@ -652,7 +722,7 @@ function insertionSort(arr, s, r){
 			highlight(s+1, 1);
 		}
 		highlight(r+1, 2);
-		update();
+		update([s-1, s, s+1, s+2]);
 		if (sortCheck()){
 			if (!n){
 				setTimeout(function(){insertionSort(arr, (s - 1) % (arr.length - 1), r0);}, delay);
@@ -703,10 +773,12 @@ function radixLSDSort(arr, s, r, queue, numLen){
 				}
 			}
 		}
-		update();
+		update([s-1, s, s+1]);
 		if (sortCheck()){
 			setTimeout(function(){radixLSDSort(arr, (s + 1) % (arr.length), r0, queue0, numLen0);}, delay);
 		}
 	}
 	else {sortFinish(0);}
 }
+
+updateDim();

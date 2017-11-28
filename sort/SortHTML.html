@@ -76,14 +76,13 @@
 			<canvas id="canvas" width="600" height="600"></canvas>
 		</div>
 	
-	
 		<div id="arrBox">
 			<div class="subtitle">
 				Array
 			</div>
 			<div class="param">
 				Length:
-				<input id="arrLen" type="number" name="arrLen" value="99" />
+				<input id="arrLen" type="number" name="arrLen" value="99" step="1" min="0" />
 			</div>
 			<div class="param">
 				Method:
@@ -120,11 +119,11 @@
 			</div>
 			<div class="param">
 				Delay(ms):
-				<input id="delay" type="number" name="delay" value="0" />
+				<input id="delay" type="number" name="delay" value="0" step="0.1" min="0" />
 			</div>
 			<div class="param">
 				Limit(s):
-				<input id="limit" type="number" name="limit" value="3600" />
+				<input id="limit" type="number" name="limit" value="3600" step="0.1" min="0" />
 			</div>
 			<input class="button" type="button" onclick="toggle()" value="Start/Stop" />
 		</div>
@@ -139,6 +138,18 @@
 			
 			<div id="status" class="param">
 			Idling
+			</div>
+		</div>
+		
+		<div id ="optionBox">
+			<div class="param">
+				Fast draw:
+				<input id="fastDraw" type="checkbox" name="fastDraw" checked />
+			</div>
+			
+			<div class="param">
+				Color correction:
+				<input id="cCorr" type="number" name="cCorr" value="2" step="0.01" min="0" />
 			</div>
 		</div>
 		
