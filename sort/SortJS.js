@@ -9,12 +9,15 @@ var startTime;									//Time at the statr of sorting
 var delay;										//Delay between updates
 var animHdl;									//Animation timer handle
 var animOffset = 0;								//Offset, used for animation
+var currStat = 0;								//Current displayed status
 var dim;										//Nomber of dimensions, 1d or 2d
 var nLine2d;									//Number of sorting line in 2d	
+var nIter2d;									//Number of times sorted all lines in 2d
+var sortType2d;									//Current sort type in 2d
 var hl = new Array();							//Array of indexes to highlight
 var hlp = new Array();							//Array of indexes to highlight - alternate
 var hls = new Array();							//Array of indexes to highlight - special
-var cCorr = 2;									//Color correction factor
+var cCorr = 2.2;								//Color correction factor
 var fastDraw = true;							//Use faster drawing mode?
 
 //Styles
@@ -53,7 +56,7 @@ function colorsUpdate(){
 }
 
 //Interpolates between 2 colors
-function cLerp(c0, c1, a, corr){
+function cLerp(c0, c1, a, gamma){
 	var r0 = parseInt(c0[1].concat(c0[2]), 16);
 	var g0 = parseInt(c0[3].concat(c0[4]), 16);
 	var b0 = parseInt(c0[5].concat(c0[6]), 16);
@@ -62,10 +65,10 @@ function cLerp(c0, c1, a, corr){
 	var g1 = parseInt(c1[3].concat(c1[4]), 16);
 	var b1 = parseInt(c1[5].concat(c1[6]), 16);
 	
-	if (corr != null){
-		var r = Math.pow((1 - a) * Math.pow(r0, corr) + a * Math.pow(r1, corr), 1 / corr);
-		var g = Math.pow((1 - a) * Math.pow(g0, corr) + a * Math.pow(g1, corr), 1 / corr);
-		var b = Math.pow((1 - a) * Math.pow(b0, corr) + a * Math.pow(b1, corr), 1 / corr);
+	if (gamma != null){
+		var r = Math.pow((1 - a) * Math.pow(r0, gamma) + a * Math.pow(r1, gamma), 1 / gamma);
+		var g = Math.pow((1 - a) * Math.pow(g0, gamma) + a * Math.pow(g1, gamma), 1 / gamma);
+		var b = Math.pow((1 - a) * Math.pow(b0, gamma) + a * Math.pow(b1, gamma), 1 / gamma);
 	}
 	else {
 		var r = (1 - a) * r0 + a * r1;
@@ -145,6 +148,7 @@ function updateStat(key, str){
 		animOffset = 0;
 		break;
 	}
+	currStat = key;
 }
 
 //Animation refresh
@@ -170,6 +174,20 @@ function signAlt(val){
 		return -1;
 	}
 	return 1;
+}
+
+//Select output value based on dim
+function dimSel(val1, val2){
+	switch (dim){
+		case 1:
+		return val1;
+		break;
+		
+		case 2:
+		return val2;
+		break;
+	}
+	return null;
 }
 
 //Swaps 2 elements in array
@@ -265,11 +283,12 @@ function makeArr(){
 			}
 		}
 		if ((arrMethod != 'sorted') && (arrMethod != 'reverse')){
-			mainArr = transArr(mainArr);
+			/*mainArr = transArr(mainArr);
 			for (var i = 0; i < arrLen; i++){
 				shuffle(mainArr[i]);
 			}
-			mainArr = transArr(mainArr);
+			mainArr = transArr(mainArr);*/
+			shuffle(mainArr);
 		}
 		break;
 	}
@@ -405,10 +424,6 @@ function update1d(arr){
 		}
 	}
 	ctx.stroke();
-	//Resets highlight
-	//hl.length = 0;
-	//hlp.length = 0;
-	//hls.length = 0;
 }
 
 //Updates canvas 2d
@@ -427,39 +442,75 @@ function update2d(arr){
 		
 		for (i = 0; i < arrLen; i++){ //Draws a box
 			for (j = 0; j < arrLen; j++){
+				//console.log(i.toString() +' '+ j.toString());
 				ctx.fillStyle = cLerp(cLerp(fStyle00, fStyle10, (mainArr[i][j][0]) / (arrLen-1), cCorr), cLerp(fStyle01, fStyle11, (mainArr[i][j][0]) / (arrLen-1), cCorr), (mainArr[i][j][1]) / (arrLen-1), cCorr);
 				ctx.fillRect(i * delta, size - j * delta, delta, -delta);
 			}
 		}
 	}
 	else {
-		ctx.fillStyle = fStyle0;
-		ctx.fillRect(arr[i][0] * delta, arr[i][1] * delta, delta, delta); //Clears canvas
-		
 		for (i = 0; i < arr.length; i++){ //Draws a box
+			//console.log(arr[i][0] +' '+ arr[i][1]);
+			if (mainArr[arr[i][0]] == null || mainArr[arr[i][0]][arr[i][1]] == null){
+				continue;
+			}
+			ctx.fillStyle = fStyle0;
+			ctx.fillRect(arr[i][0] * delta, size - (arr[i][1]) * delta, delta, -delta);
 			ctx.fillStyle = cLerp(cLerp(fStyle00, fStyle10, (mainArr[arr[i][0]][arr[i][1]][0]) / (arrLen-1), cCorr), cLerp(fStyle01, fStyle11, (mainArr[arr[i][0]][arr[i][1]][0]) / (arrLen-1), cCorr), (mainArr[arr[i][0]][arr[i][1]][1]) / (arrLen-1), cCorr);
-			ctx.fillRect(arr[i][0] * delta, size - arr[i][1] * delta, delta, -delta);
+			ctx.fillRect(arr[i][0] * delta, size - (arr[i][1]) * delta, delta, -delta);
 		}
 	}
 	
 	//Highlights selected indexes
 	for (i = 0; i < hl.length; i++) {
-		ctx.fillStyle = fStyle3;
-		ctx.fillRect(hl[i][0] * delta, size - hl[i][1] * delta, delta, - (delta * mainArr[hl[i]]));
+		if (hl[i][2] == 1){
+			if (mainArr[hl[i][0]] != null && mainArr[hl[i][0]][hl[i][1]] != null){
+				ctx.fillStyle = fStyle3;
+				ctx.fillRect(hl[i][0] * delta, size - hl[i][1] * delta, delta, -delta);
+			}
+			hl[i][2] = 0;
+		}
+		else {
+			if (mainArr[hl[i][0]] != null && mainArr[hl[i][0]][hl[i][1]] != null){
+				ctx.fillStyle = cLerp(cLerp(fStyle00, fStyle10, (mainArr[hl[i][0]][hl[i][1]][0]) / (arrLen-1), cCorr), cLerp(fStyle01, fStyle11, (mainArr[hl[i][0]][hl[i][1]][0]) / (arrLen-1), cCorr), (mainArr[hl[i][0]][hl[i][1]][1]) / (arrLen-1), cCorr);
+				ctx.fillRect(hl[i][0] * delta, size - hl[i][1] * delta, delta, -delta);
+			}
+			hl.splice(i--, 1);
+		}
 	}
 	for (i = 0; i < hlp.length; i++) {
-		ctx.fillStyle = fStyle4;
-		ctx.fillRect(hlp[i][0] * delta, size - hlp[i][1] * delta, delta, - (delta * mainArr[hlp[i]]));
+		if (hlp[i][2] == 1){
+			if (mainArr[hlp[i][0]] != null && mainArr[hlp[i][0]][hlp[i][1]] != null){
+				ctx.fillStyle = fStyle4;
+				ctx.fillRect(hlp[i][0] * delta, size - hlp[i][1] * delta, delta, -delta);
+			}
+			hlp[i][2] = 0;
+		}
+		else {
+			if (mainArr[hlp[i][0]] != null && mainArr[hlp[i][0]][hlp[i][1]] != null){
+				ctx.fillStyle = cLerp(cLerp(fStyle00, fStyle10, (mainArr[hlp[i][0]][hlp[i][1]][0]) / (arrLen-1), cCorr), cLerp(fStyle01, fStyle11, (mainArr[hlp[i][0]][hlp[i][1]][0]) / (arrLen-1), cCorr), (mainArr[hlp[i][0]][hlp[i][1]][1]) / (arrLen-1), cCorr);
+				ctx.fillRect(hlp[i][0] * delta, size - hlp[i][1] * delta, delta, -delta);
+			}
+			hlp.splice(i--, 1);
+		}
 	}
 	for (i = 0; i < hls.length; i++) {
-		ctx.fillStyle = fStyle5;
-		ctx.fillRect(hls[i][0] * delta, size - hls[i][1] * delta, delta, - (delta * mainArr[hls[i]]));
+		if (hls[i][2] == 1){
+			if (mainArr[hls[i][0]] != null && mainArr[hls[i][0]][hls[i][1]] != null){
+				ctx.fillStyle = fStyle5;
+				ctx.fillRect(hls[i][0] * delta, size - hls[i][1] * delta, delta, -delta);
+			}
+			hls[i][2] = 0;
+		}
+		else {
+			if (mainArr[hls[i][0]] != null && mainArr[hls[i][0]][hls[i][1]] != null){
+				ctx.fillStyle = cLerp(cLerp(fStyle00, fStyle10, (mainArr[hls[i][0]][hls[i][1]][0]) / (arrLen-1), cCorr), cLerp(fStyle01, fStyle11, (mainArr[hls[i][0]][hls[i][1]][0]) / (arrLen-1), cCorr), (mainArr[hls[i][0]][hls[i][1]][1]) / (arrLen-1), cCorr);
+				ctx.fillRect(hls[i][0] * delta, size - hls[i][1] * delta, delta, -delta);
+			}
+			hls.splice(i--, 1);
+		}
 	}
 	ctx.stroke();
-	//Resets highlight
-	hl.length = 0;
-	hlp.length = 0;
-	hls.length = 0;
 }
 
 //Toggles sorting
@@ -474,6 +525,12 @@ function toggle(){
 			document.getElementById('limit').value = timeLimit;
 			
 			fastDraw = document.getElementById('fastDraw').checked;
+			
+			if (dim == 2){
+				nLine2d = 0;
+				nIter2d = 0;
+				sortType2d = document.getElementById('type').value;
+			}
 			
 			sort(document.getElementById('type').value);
 		}
@@ -539,16 +596,101 @@ function sort(type){
 			break;
 		}
 		break;
+		
+		case 2:
+		if (nLine2d > arrLen-1){
+			nLine2d = 0;
+			nIter2d++;
+			mainArr = transArr(mainArr);
+			update();
+		}
+		//console.log('newline');
+		switch(type){
+			case 'bogoSort':
+			bogoSort(mainArr[nLine2d], 0);
+			if (currStat != 3){
+			updateStat(3, 'Bogosort');
+			}
+			break;
+	
+			case 'bubbleSort':
+			bubbleSort(mainArr[nLine2d], 0, 0, false);
+			if (currStat != 3){
+				updateStat(3, 'Bubble sort');
+			}
+			break;
+	
+			case 'combSort':
+			combSort(mainArr[nLine2d], 0, 0, false);
+			if (currStat != 3){
+				updateStat(3, 'Comb sort');
+			}
+			break;
+	
+			case 'cocktailSort':
+			cocktailSort(mainArr[nLine2d], 0, 0, false);
+			if (currStat != 3){
+				updateStat(3, 'Cocktail sort');
+			}
+			break;
+		
+			case 'insertionSort':
+			insertionSort(mainArr[nLine2d], 0, 0);
+			if (currStat != 3){
+				updateStat(3, 'Insertion sort');
+			}
+			break;
+		
+			case 'gnomeSort':
+			gnomeSort(mainArr[nLine2d], 0);
+			if (currStat != 3){
+				updateStat(3, 'Gnome sort');
+			}
+			break;
+		
+			case 'radixLSDSort':
+			radixLSDSort(mainArr[nLine2d], 0, 0, 0, 0);
+			if (currStat != 3){
+				updateStat(3, 'Radix LSD sort');
+			}
+			break;
+		}
+		break;
 	}
 }
 
 //Activates on sort finish
 function sortFinish(code, str){
-	sorting = false;
-	update();
+	switch (dim){
+		case 1:
+		sorting = false;
+		update();
+		break;
+		
+		case 2:
+		if (nIter2d >= 2){
+			sorting = false;
+			update();
+			updateStat(1);
+			return 0;
+		}
+		else {
+			nLine2d++;
+			sort(sortType2d);
+		}
+		break;
+	}
+	
+	if (code != 0){
+		sorting = false;
+		update();
+	}
+	
 	switch (code){
 		case 0:
-		updateStat(1);
+		if (dim != 2){ 
+			updateStat(1);
+		}
 		break;
 		
 		case 1:
@@ -604,22 +746,43 @@ function bogoSort(arr, s, end){
 function bubbleSort(arr, s, r, end){
 	if (!(end && s == 0)){
 		var end0 = end;
-		if (arr[s] > arr[s+1]){
+		if (dimSel(arr[s], arr[s][1-nIter2d]) > dimSel(arr[s+1], arr[s+1][1-nIter2d])){
 			swap(arr, s, s+1);
-			highlight(s, 1);
-			highlight(s+1, 1);
+			switch (dim){
+				case 1:
+				highlight(s, 1);
+				highlight(s+1, 1);
+				break;
+				
+				case 2:
+				highlight2d(nLine2d, s, 1);
+				highlight2d(nLine2d, s+1, 1);
+				break;
+			}
 			end0 = false;
 		}
-		highlight(s);
-		highlight(s+1);
-		highlight(arr.length + 1 - r, 2);
-		update();
+		switch (dim){
+			case 1:
+			highlight(s);
+			highlight(s+1);
+			highlight(arr.length + 1 - r, 2);
+			update([s, s+1]);
+			break;
+			
+			case 2:
+			highlight2d(nLine2d, s);
+			highlight2d(nLine2d, s+1);
+			highlight2d(nLine2d, arr.length + 1 - r, 2);
+			update([[nLine2d, s], [nLine2d, s+1]]);
+			//console.log(s.toString() + ' ' + nLine2d.toString() +' '+ arrLen.toString() +' ' + r);
+			break;
+		}
 		var r0 = r;
 		if (s == 0) {
 			r0++;
 			end0 = true;
 		}
-		if (sortCheck([s-1 ,s, s+1, s+2])){
+		if (sortCheck()){
 			setTimeout(function(){bubbleSort(arr, (s + 1) % (arr.length - r), r0, end0);}, delay);
 		}
 	}
@@ -750,7 +913,15 @@ function radixLSDSort(arr, s, r, queue, numLen){
 				if (queue0[q].length > 0){
 					var qq;
 					for (qq = 0; qq < queue0[q].length; qq++){
-						numLen0 = Math.ceil(Math.max(Math.log(queue0[q][qq] + 1) / Math.LN10, numLen0));
+						switch (dim){
+							case 1:
+							numLen0 = Math.ceil(Math.max(Math.log(queue0[q][qq] + 1) / Math.LN10, numLen0));
+							break;
+							
+							case 2:
+							numLen0 = Math.ceil(Math.max(Math.log(queue0[q][qq][1-nIter2d] + 1) / Math.LN10, numLen0));
+							break;
+						}
 					}
 				}
 			}
@@ -758,22 +929,48 @@ function radixLSDSort(arr, s, r, queue, numLen){
 		if ((r0 == 1)&&(s == 0)){
 		queue0 = [ [],[],[],[],[],[],[],[],[],[] ];
 		}
-		var digit = Math.floor((arr[s] % Math.pow(10, Math.ceil(r0/2))) / Math.pow(10, Math.ceil(r0/2)-1));
+		var digit = dimSel(Math.floor((arr[s] % Math.pow(10, Math.ceil(r0/2))) / Math.pow(10, Math.ceil(r0/2)-1)), Math.floor((arr[s][1-nIter2d] % Math.pow(10, Math.ceil(r0/2))) / Math.pow(10, Math.ceil(r0/2)-1)));
 		if (r0 % 2){
-			queue0[digit].push(arr[s]);
-			highlight(s);
+			if (queue0[digit] != null){
+				queue0[digit].push(arr[s]);
+				switch (dim){
+					case 1:
+					highlight(s);
+					break;
+				
+					case 2:
+					highlight2d(nLine2d, s);
+					break;
+				}
+			}
 		}
 		else {
 			for (q = 0; q < 10; q++){
 				if (queue0[q].length > 0){
 					arr[s] = queue0[q][0];
-					highlight(s, 1);
+					switch (dim){
+						case 1:
+						highlight(s, 1);
+						break;
+						
+						case 2:
+						highlight2d(nLine2d, s, 1);
+						break;
+					}
 					queue0[q].shift();
 					break;
 				}
 			}
 		}
-		update([s-1, s, s+1]);
+		switch (dim) {
+			case 1:
+			update([s-1, s, s+1]);
+			break;
+			
+			case 2:
+			update([[nLine2d, s-1], [nLine2d, s], [nLine2d, s+1]]);
+			break;
+		}
 		if (sortCheck()){
 			setTimeout(function(){radixLSDSort(arr, (s + 1) % (arr.length), r0, queue0, numLen0);}, delay);
 		}

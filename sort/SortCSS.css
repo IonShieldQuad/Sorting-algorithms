@@ -13,7 +13,7 @@ div#box {
 	border-radius: 6px;
 	padding: 0px;
 	margin: 0px auto 0px auto;
-	background-color: #bbb;
+	background-color: #aaa;
 	min-width: 1150px;
 	max-width: 1150px;
 	min-height: 1100px;
@@ -312,7 +312,7 @@ div.param input[type = checkbox] {
 div.param input[type = checkbox]:checked {
 	border-width: 3px;
 	border-style: solid;
-	background-color: #f69;
+	background-color: #96b;
 	transform: rotate(90deg);
 }
 
