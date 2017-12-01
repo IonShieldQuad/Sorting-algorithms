@@ -302,7 +302,7 @@ div.param input[type = radio]:hover {
 div.param input[type = checkbox] {
 	border: 2px solid #649;
 	border-radius: 30%;
-	transition: border 0.3s, background-color 0.3s, transform 1s;
+	transition: border 0.3s, background-color 0.3s;
 	width: 16px;
 	height: 16px;
 	background-color: #ddd;
@@ -313,7 +313,6 @@ div.param input[type = checkbox]:checked {
 	border-width: 3px;
 	border-style: solid;
 	background-color: #96b;
-	transform: rotate(90deg);
 }
 
 div.param input[type = checkbox]:hover {

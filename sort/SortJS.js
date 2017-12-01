@@ -19,6 +19,7 @@ var hlp = new Array();							//Array of indexes to highlight - alternate
 var hls = new Array();							//Array of indexes to highlight - special
 var cCorr = 2.2;								//Color correction factor
 var fastDraw = true;							//Use faster drawing mode?
+var noise2d = false;							//Sort 2d with noise?
 
 //Styles
 var fStyle0 = '#444'; 		//Background
@@ -197,6 +198,13 @@ function swap(arr, i1, i2){
 	arr[i2] = temp;
 }
 
+//Swaps 2 elements in 2d array
+function swap2d(arr, i1, i2){
+	var temp = arr[i1[0]][i1[1]];
+	arr[i1[0]][i1[1]] = arr[i2[0]][i2[1]];
+	arr[i2[0]][i2[1]] = temp;
+}
+
 //Shuffles array
 function shuffle (arr){
 	var j;
@@ -283,12 +291,12 @@ function makeArr(){
 			}
 		}
 		if ((arrMethod != 'sorted') && (arrMethod != 'reverse')){
-			/*mainArr = transArr(mainArr);
+			mainArr = transArr(mainArr);
 			for (var i = 0; i < arrLen; i++){
 				shuffle(mainArr[i]);
 			}
-			mainArr = transArr(mainArr);*/
-			shuffle(mainArr);
+			mainArr = transArr(mainArr);
+			//shuffle(mainArr);
 		}
 		break;
 	}
@@ -442,7 +450,9 @@ function update2d(arr){
 		
 		for (i = 0; i < arrLen; i++){ //Draws a box
 			for (j = 0; j < arrLen; j++){
-				//console.log(i.toString() +' '+ j.toString());
+			if (mainArr[i] == null || mainArr[i][j] == null){
+				continue;
+			}
 				ctx.fillStyle = cLerp(cLerp(fStyle00, fStyle10, (mainArr[i][j][0]) / (arrLen-1), cCorr), cLerp(fStyle01, fStyle11, (mainArr[i][j][0]) / (arrLen-1), cCorr), (mainArr[i][j][1]) / (arrLen-1), cCorr);
 				ctx.fillRect(i * delta, size - j * delta, delta, -delta);
 			}
@@ -450,7 +460,6 @@ function update2d(arr){
 	}
 	else {
 		for (i = 0; i < arr.length; i++){ //Draws a box
-			//console.log(arr[i][0] +' '+ arr[i][1]);
 			if (mainArr[arr[i][0]] == null || mainArr[arr[i][0]][arr[i][1]] == null){
 				continue;
 			}
@@ -525,6 +534,7 @@ function toggle(){
 			document.getElementById('limit').value = timeLimit;
 			
 			fastDraw = document.getElementById('fastDraw').checked;
+			noise2d = document.getElementById('noise2d').checked;
 			
 			if (dim == 2){
 				nLine2d = 0;
@@ -604,56 +614,109 @@ function sort(type){
 			mainArr = transArr(mainArr);
 			update();
 		}
-		//console.log('newline');
-		switch(type){
-			case 'bogoSort':
-			bogoSort(mainArr[nLine2d], 0);
-			if (currStat != 3){
-			updateStat(3, 'Bogosort');
-			}
-			break;
+		if (nIter2d != 0 || noise2d){
+			switch(type){
+				case 'bogoSort':
+				bogoSort(mainArr[nLine2d], 0);
+				if (currStat != 3){
+				updateStat(3, 'Bogosort');
+				}
+				break;
 	
-			case 'bubbleSort':
-			bubbleSort(mainArr[nLine2d], 0, 0, false);
-			if (currStat != 3){
-				updateStat(3, 'Bubble sort');
-			}
-			break;
+				case 'bubbleSort':
+				bubbleSort(mainArr[nLine2d], 0, 0, false);
+				if (currStat != 3){
+					updateStat(3, 'Bubble sort');
+				}
+				break;
 	
-			case 'combSort':
-			combSort(mainArr[nLine2d], 0, 0, false);
-			if (currStat != 3){
-				updateStat(3, 'Comb sort');
-			}
-			break;
+				case 'combSort':
+				combSort(mainArr[nLine2d], 0, 0, false);
+				if (currStat != 3){
+					updateStat(3, 'Comb sort');
+				}
+				break;
 	
-			case 'cocktailSort':
-			cocktailSort(mainArr[nLine2d], 0, 0, false);
-			if (currStat != 3){
-				updateStat(3, 'Cocktail sort');
-			}
-			break;
+				case 'cocktailSort':
+				cocktailSort(mainArr[nLine2d], 0, 0, false);
+				if (currStat != 3){
+					updateStat(3, 'Cocktail sort');
+				}
+				break;
 		
-			case 'insertionSort':
-			insertionSort(mainArr[nLine2d], 0, 0);
-			if (currStat != 3){
-				updateStat(3, 'Insertion sort');
-			}
-			break;
+				case 'insertionSort':
+				insertionSort(mainArr[nLine2d], 0, 0);
+				if (currStat != 3){
+					updateStat(3, 'Insertion sort');
+				}
+				break;
 		
-			case 'gnomeSort':
-			gnomeSort(mainArr[nLine2d], 0);
-			if (currStat != 3){
-				updateStat(3, 'Gnome sort');
-			}
-			break;
+				case 'gnomeSort':
+				gnomeSort(mainArr[nLine2d], 0);
+				if (currStat != 3){
+					updateStat(3, 'Gnome sort');
+				}
+				break;
 		
-			case 'radixLSDSort':
-			radixLSDSort(mainArr[nLine2d], 0, 0, 0, 0);
-			if (currStat != 3){
-				updateStat(3, 'Radix LSD sort');
+				case 'radixLSDSort':
+				radixLSDSort(mainArr[nLine2d], 0, 0, 0, 0);
+				if (currStat != 3){
+					updateStat(3, 'Radix LSD sort');
+				}
+				break;
 			}
-			break;
+		}
+		else {
+			switch(type){
+				case 'bogoSort':
+				bogoSort2d(mainArr, 0);
+				if (currStat != 3){
+				updateStat(3, 'Bogosort');
+				}
+				break;
+	
+				case 'bubbleSort':
+				bubbleSort2d(mainArr, 0, 0, false);
+				if (currStat != 3){
+					updateStat(3, 'Bubble sort');
+				}
+				break;
+	
+				case 'combSort':
+				combSort2d(mainArr, 0, 0, false);
+				if (currStat != 3){
+					updateStat(3, 'Comb sort');
+				}
+				break;
+	
+				case 'cocktailSort':
+				cocktailSort2d(mainArr, 0, 0, false);
+				if (currStat != 3){
+					updateStat(3, 'Cocktail sort');
+				}
+				break;
+		
+				case 'insertionSort':
+				insertionSort2d(mainArr, 0, 0);
+				if (currStat != 3){
+					updateStat(3, 'Insertion sort');
+				}
+				break;
+		
+				case 'gnomeSort':
+				gnomeSort2d(mainArr, 0);
+				if (currStat != 3){
+					updateStat(3, 'Gnome sort');
+				}
+				break;
+		
+				case 'radixLSDSort':
+				radixLSDSort2d(mainArr, 0, 0, 0, 0);
+				if (currStat != 3){
+					updateStat(3, 'Radix LSD sort');
+				}
+				break;
+			}
 		}
 		break;
 	}
@@ -675,8 +738,16 @@ function sortFinish(code, str){
 			return 0;
 		}
 		else {
-			nLine2d++;
-			sort(sortType2d);
+			if (code == 0){
+				if (nIter2d == 0 && !noise2d){
+					nIter2d++;
+					sort(sortType2d);
+				}
+				else {
+					nLine2d++;
+					sort(sortType2d);
+				}
+			}
 		}
 		break;
 	}
@@ -719,6 +790,16 @@ function sortCheck(){
 		return true
 }
 
+//Finds i from index
+function findI(ind, len){
+	return Math.floor(ind / len);
+}
+
+//Finds j from index
+function findJ(ind, len){
+	return ind % len;
+}
+
 //Bogosort
 function bogoSort(arr, s, end){
 	if (!(end && s == 0)){
@@ -726,9 +807,19 @@ function bogoSort(arr, s, end){
 		//Shuffle
 		var j = getRandomInt(s, arr.length-1);
 		swap(arr, s, j);
-		highlight(s);
-		highlight(j);
-		update(s-1, s, s+1, j-1, j, j+1);
+		switch (dim){
+			case 1:
+			highlight(s);
+			highlight(j);
+			update(s, j);
+			break;
+			
+			case 2:
+			highlight2d(nLine2d, s);
+			highlight2d(nLine2d, j);
+			update([nLine2d, s], [nLine2d, j]);
+			break;
+		}
 		if (arr[s] < arr[s-1]){
 			end0 = false;
 		}
@@ -737,6 +828,32 @@ function bogoSort(arr, s, end){
 		}
 		if (sortCheck()){
 			setTimeout(function(){bogoSort(arr, (s + 1) % (arr.length), end0);}, delay);
+		}
+	}
+	else {sortFinish(0);}
+}
+
+//Bogosort with 2d array
+function bogoSort2d(arr, s, end){
+	if (!(end && s == 0)){
+		var end0 = end;
+		var len = arr[0].length;
+		//Shuffle
+		var j = getRandomInt(s, Math.pow(arr.length, 2)-1);
+		swap2d(arr, [findI(s, len), findJ(s, len)], [findI(j, len), findJ(j, len)]);
+		highlight2d(findI(s, len), findJ(s, len));
+		highlight2d(findI(j, len), findJ(j, len));
+		update([findI(s, len), findJ(s, len)], [findI(j, len), findJ(j, len)]);
+		if (s > 0){
+			if (arr[findI(s, len)][findJ(s, len)] < arr[findI(s-1, len)][findJ(s-1, len)]){
+			end0 = false;
+			}
+		}
+		if (s == 0) {
+			end0 = true;
+		}
+		if (sortCheck()){
+			setTimeout(function(){bogoSort2d(arr, (s + 1) % (Math.pow(arr.length, 2)), end0);}, delay);
 		}
 	}
 	else {sortFinish(0);}
@@ -774,7 +891,6 @@ function bubbleSort(arr, s, r, end){
 			highlight2d(nLine2d, s+1);
 			highlight2d(nLine2d, arr.length + 1 - r, 2);
 			update([[nLine2d, s], [nLine2d, s+1]]);
-			//console.log(s.toString() + ' ' + nLine2d.toString() +' '+ arrLen.toString() +' ' + r);
 			break;
 		}
 		var r0 = r;
@@ -789,6 +905,36 @@ function bubbleSort(arr, s, r, end){
 	else {sortFinish(0);}
 }
 
+//Bubble sort with 2d array
+function bubbleSort2d(arr, s, r, end){
+	try{
+	if (!(end && s == 0)){
+		var end0 = end;
+		var len = arr[0].length;
+		if (arr[findI(s, len)][findJ(s, len)][1-nIter2d] > arr[findI(s+1, len)][findJ(s+1, len)][1-nIter2d]){
+			swap2d(arr, [findI(s, len), findJ(s, len)], [findI(s+1, len), findJ(s+1, len)]);
+			highlight2d(findI(s, len), findJ(s, len), 1);
+			highlight2d(findI(s+1, len), findJ(s+1, len), 1);
+			end0 = false;
+		}
+		highlight2d(findI(s, len), findJ(s, len));
+		highlight2d(findI(s+1, len), findJ(s+1, len));
+		highlight2d(findI(Math.pow(len, 2) + 1 - r, len), findJ(Math.pow(len, 2) + 1 - r, len), 2);
+		update([[findI(s, len), findJ(s, len)], [findI(s+1, len), findJ(s+1, len)]]);
+		var r0 = r;
+		if (s == 0) {
+			r0++;
+			end0 = true;
+		}
+		if (sortCheck()){
+			setTimeout(function(){bubbleSort2d(arr, (s + 1) % (Math.pow(arr.length, 2) - r), r0, end0);}, delay);
+		}
+	}
+	else {sortFinish(0);}
+	}
+	catch (e){console.log(e);}
+}
+
 //Comb sort
 function combSort(arr, s, r, end){
 	if (!(end && s == 0  && Math.ceil(arr.length / Math.pow(1.3, r + 1)) <= 1)){
@@ -799,17 +945,63 @@ function combSort(arr, s, r, end){
 			end0 = true;
 		}
 		var g = Math.ceil(arr.length / Math.pow(1.3, r0 + 1));
-		if (arr[s] > arr[s + g]){
+		if (dimSel(arr[s], arr[s][1-nIter2d]) > dimSel(arr[s + g], arr[s + g][1-nIter2d])){
 			swap(arr, s, s + g);
-			highlight(s, 1);
-			highlight(s + g, 1);
+			switch (dim){
+				case 1:
+				highlight(s, 1);
+				highlight(s + g, 1);
+				break;
+				
+				case 2:
+				highlight2d(nLine2d, s, 1);
+				highlight2d(nLine2d, s + g, 1);
+				break;
+			}
 			end0 = false;
 		}
-		highlight(s);
-		highlight(s + g);
-		update([s-1 ,s, s+1, s+g-1, s+g, s+g+1]);
+		switch (dim){
+			case 1:
+			highlight(s);
+			highlight(s + g);
+			update([s, s+g]);
+			break;
+			
+			case 2:
+			highlight2d(nLine2d, s);
+			highlight2d(nLine2d, s + g);
+			update([[nLine2d, s], [nLine2d, s+g]]);
+			break;
+		}
 		if (sortCheck()){
 			setTimeout(function(){combSort(arr, (s + 1) % (arr.length - g), r0, end0);}, delay);
+		}
+	}
+	else {sortFinish(0);}
+}
+
+//Comb sort with 2d array
+function combSort2d(arr, s, r, end){
+	if (!(end && s == 0  && Math.ceil(Math.pow(arr.length, 2) / Math.pow(1.3, r + 1)) <= 1)){
+		var end0 = end;
+		var r0 = r;
+		var len = arr[0].length;
+		if (s == 0) {
+			r0++;
+			end0 = true;
+		}
+		var g = Math.ceil(Math.pow(arr.length, 2) / Math.pow(1.3, r0 + 1));
+		if (arr[findI(s, len)][findJ(s, len)][1-nIter2d] > arr[findI(s + g, len)][findJ(s + g, len)][1-nIter2d]){
+			swap2d(arr, [findI(s, len), findJ(s, len)], [findI(s + g, len), findJ(s + g, len)]);
+			highlight2d(findI(s, len), findJ(s, len), 1);
+			highlight2d(findI(s + g, len), findJ(s + g, len), 1);
+			end0 = false;
+		}
+		highlight2d(findI(s, len), findJ(s, len));
+		highlight2d(findI(s + g, len), findJ(s + g, len));
+		update([[findI(s, len), findJ(s, len)], [findI(s + g, len), findJ(s + g, len)]]);
+		if (sortCheck()){
+			setTimeout(function(){combSort2d(arr, (s + 1) % (Math.pow(arr.length, 2) - g), r0, end0);}, delay);
 		}
 	}
 	else {sortFinish(0);}
@@ -826,19 +1018,70 @@ function cocktailSort(arr, s, r, end){
 		if ((s == Math.floor((arr.length - 1) / 2))&&((signAlt(r) > 0))){
 			end0 = true;
 		}
-		if (arr[s] > arr[s+1]){
+		if (dimSel(arr[s], arr[s][1-nIter2d]) > dimSel(arr[s+1], arr[s+1][1-nIter2d])){
 			swap(arr, s, s+1);
-			highlight(s, 1);
-			highlight(s+1, 1);
+			switch (dim){
+				case 1:
+				highlight(s, 1);
+				highlight(s+1, 1);
+				break;
+				
+				case 2:
+				highlight2d(nLine2d, s, 1);
+				highlight2d(nLine2d, s+1, 1);
+				break;
+			}
 			end0 = false;
 		}
-		highlight(s);
-		highlight(s+1);
-		highlight(Math.floor(r/2)-1, 2);
-		highlight(arr.length - Math.ceil(r/2), 2);
-		update([s, s+1]);
+		switch (dim){
+			case 1:
+			highlight(s);
+			highlight(s+1);
+			highlight(Math.floor(r/2)-1, 2);
+			highlight(arr.length - Math.ceil(r/2), 2);
+			update([s, s+1]);
+			break;
+			
+			case 2:
+			highlight2d(nLine2d, s);
+			highlight2d(nLine2d, s+1);
+			highlight2d(nLine2d, Math.floor(r/2)-1, 2);
+			highlight2d(nLine2d, arr.length - Math.ceil(r/2), 2);
+			update([[nLine2d, s], [nLine2d, s+1]]);
+			break;
+		}
 		if (sortCheck()){
 			setTimeout(function(){cocktailSort(arr, (s + signAlt(r)) % (arr.length - 1), r0, end0);}, delay);
+		}
+	}
+	else {sortFinish(0);}
+}
+
+//Cocktail sort with 2d array
+function cocktailSort2d(arr, s, r, end){
+	if (r < Math.pow(arr.length, 2) && !(end && (s == Math.floor((Math.pow(arr.length, 2) - 1) / 2))&&((signAlt(r) > 0)))){
+		var end0 = end;
+		var r0 = r;
+		var len = arr[0].length;
+		if (((s <= Math.floor(r/2) + 1)&&(signAlt(r) < 0))||((s >= Math.pow(arr.length, 2) - Math.ceil(r/2) - 3)&&(signAlt(r) > 0))) {
+			r0++;
+		}
+		if ((s == Math.floor((Math.pow(arr.length, 2) - 1) / 2))&&((signAlt(r) > 0))){
+			end0 = true;
+		}
+		if (arr[findI(s, len)][findJ(s, len)][1-nIter2d] > arr[findI(s+1, len)][findJ(s+1, len)][1-nIter2d]){
+			swap2d(arr, [findI(s, len), findJ(s, len)], [findI(s+1, len), findJ(s+1, len)]);
+			highlight2d(findI(s, len), findJ(s, len), 1);
+			highlight2d(findI(s+1, len), findJ(s+1, len), 1);
+			end0 = false;
+		}
+		highlight2d(findI(s, len), findJ(s, len));
+		highlight2d(findI(s+1, len), findJ(s+1, len));
+		highlight2d(findI(Math.floor(r/2)-1, len), findJ(Math.floor(r/2)-1, len), 2);
+		highlight2d(findI(Math.pow(arr.length, 2) - Math.ceil(r/2), len), findJ(Math.pow(arr.length, 2) - Math.ceil(r/2), len), 2);
+		update([[findI(s, len), findJ(s, len)], [findI(s+1, len), findJ(s+1, len)]]);
+		if (sortCheck()){
+			setTimeout(function(){cocktailSort2d(arr, (s + signAlt(r)) % (Math.pow(arr.length, 2) - 1), r0, end0);}, delay);
 		}
 	}
 	else {sortFinish(0);}
@@ -848,15 +1091,36 @@ function cocktailSort(arr, s, r, end){
 function gnomeSort(arr, s){
 	if (s < arr.length - 1){
 		var b = false;
-		if (arr[s] > arr[s+1]){
+		if (dimSel(arr[s], arr[s][1-nIter2d]) > dimSel(arr[s+1], arr[s+1][1-nIter2d])){
 			swap(arr, s, s+1);
-			highlight(s, 1);
-			highlight(s+1, 1);
-			b = true;
+			switch (dim){
+				case 1:
+				highlight(s, 1);
+				highlight(s+1, 1);
+				break;
+				
+				case 2:
+				highlight2d(nLine2d, s, 1);
+				highlight2d(nLine2d, s+1, 1);
+				break;
+			}
+			if (s > 0){
+				b = true;
+			}
 		}
-		highlight(s);
-		highlight(s+1);
-		update([s-1 ,s, s+1, s+2]);
+		switch (dim){
+			case 1:
+			highlight(s);
+			highlight(s+1);
+			update([s, s+1]);
+			break;
+			
+			case 2:
+			highlight2d(nLine2d, s);
+			highlight2d(nLine2d, s+1);
+			update([[nLine2d, s], [nLine2d, s+1]]);
+			break;
+		}
 		if (sortCheck()){
 			if (!b){
 				setTimeout(function(){gnomeSort(arr, (s + 1) % (arr.length));}, delay);
@@ -869,29 +1133,113 @@ function gnomeSort(arr, s){
 	else {sortFinish(0);}
 }
 
+//Gnome sort with 2d array
+function gnomeSort2d(arr, s){
+	if (s < Math.pow(arr.length, 2) - 1){
+		var b = false;
+		var len = arr[0].length;
+		if (arr[findI(s, len)][findJ(s, len)][1-nIter2d] > arr[findI(s+1, len)][findJ(s+1, len)][1-nIter2d]){
+			swap2d(arr, [findI(s, len), findJ(s, len)], [findI(s+1, len), findJ(s+1, len)]);
+			highlight2d(findI(s, len), findJ(s, len), 1);
+			highlight2d(findI(s+1, len), findJ(s+1, len), 1);
+			if (s > 0){
+				b = true;
+			}
+		}
+		highlight2d(findI(s, len), findJ(s, len));
+		highlight2d(findI(s+1, len), findJ(s+1, len));
+		update([[findI(s, len), findJ(s, len)], [findI(s+1, len), findJ(s+1, len)]]);
+		if (sortCheck()){
+			if (!b){
+				setTimeout(function(){gnomeSort2d(arr, (s + 1) % (Math.pow(arr.length, 2)));}, delay);
+			}
+			else {
+				setTimeout(function(){gnomeSort2d(arr, (s - 1) % (Math.pow(arr.length, 2) - 1));}, delay);
+			}
+		}
+	}
+	else {sortFinish(0);}
+}
+
 //Insertion sort
 function insertionSort(arr, s, r){
 	if (r < arr.length){
 		var r0 = r;
 		var n = false;
-		if (arr[s+1] < arr[s]){
+		if (arr[s] != null && dimSel(arr[s+1], arr[s+1][1-nIter2d]) < dimSel(arr[s], arr[s][1-nIter2d])){
 			swap(arr, s+1, s);
-			highlight(s);
-			highlight(s+1);
+			switch (dim){
+				case 1:
+				highlight(s);
+				highlight(s+1);
+				break;
+				
+				case 2:
+				highlight2d(nLine2d, s);
+				highlight2d(nLine2d, s+1);
+				break;
+			}
 		}
 		else {
 			n = true;
 			r0++;
-			highlight(s+1, 1);
+			switch (dim){
+				case 1:
+				highlight(s+1, 1);
+				break;
+				
+				case 2:
+				highlight2d(nLine2d, s+1, 1);
+				break;
+			}
 		}
-		highlight(r+1, 2);
-		update([s-1, s, s+1, s+2]);
+		switch (dim){
+			case 1:
+			highlight(r+1, 2);
+			update([s, s+1]);
+			break;
+			
+			case 2:
+			highlight2d(nLine2d, r+1, 2);
+			update([[nLine2d, s], [nLine2d, s+1]]);
+			break;
+		}
 		if (sortCheck()){
 			if (!n){
 				setTimeout(function(){insertionSort(arr, (s - 1) % (arr.length - 1), r0);}, delay);
 			}
 			else {
-				setTimeout(function(){insertionSort(arr, (r0-1) % (arr.length - 1), r0);}, delay);
+				setTimeout(function(){insertionSort(arr, (r0 - 1) % (arr.length - 1), r0);}, delay);
+			}
+		}
+	}
+	else {sortFinish(0);}
+}
+
+//Insertion sort with 2d
+function insertionSort2d(arr, s, r){
+	if (r < Math.pow(arr.length, 2)){
+		var r0 = r;
+		var n = false;
+		var len = arr[0].length;
+		if (arr[findI(s, len)] != null && arr[findI(s, len)][findJ(s, len)] != null && arr[findI(s+1, len)][findJ(s+1, len)][1-nIter2d] < arr[findI(s, len)][findJ(s, len)][1-nIter2d]){
+			swap2d(arr, [findI(s+1, len), findJ(s+1, len)], [findI(s, len), findJ(s, len)]);
+			highlight2d(findI(s, len), findJ(s, len));
+			highlight2d(findI(s+1, len), findJ(s+1, len));
+		}
+		else {
+			n = true;
+			r0++;
+			highlight2d(findI(s+1, len), findJ(s+1, len), 1);
+		}
+		highlight2d(findI(r+1, len), findJ(r+1, len), 2);
+		update([[findI(s, len), findJ(s, len)], [findI(s+1, len), findJ(s+1, len)]]);
+		if (sortCheck()){
+			if (!n){
+				setTimeout(function(){insertionSort2d(arr, (s - 1) % (Math.pow(arr.length, 2) - 1), r0);}, delay);
+			}
+			else {
+				setTimeout(function(){insertionSort2d(arr, (r0 - 1) % (Math.pow(arr.length, 2) - 1), r0);}, delay);
 			}
 		}
 	}
@@ -973,6 +1321,55 @@ function radixLSDSort(arr, s, r, queue, numLen){
 		}
 		if (sortCheck()){
 			setTimeout(function(){radixLSDSort(arr, (s + 1) % (arr.length), r0, queue0, numLen0);}, delay);
+		}
+	}
+	else {sortFinish(0);}
+}
+
+//Radix LSD sort with 2d array
+function radixLSDSort2d(arr, s, r, queue, numLen){
+	if (!(r > 1 && s == 0 && Math.floor(r/2) > numLen - 1)){
+		var r0 = r;
+		var queue0 = queue;
+		var q = 0;
+		var numLen0 = numLen;
+		var len = arr[0].length;
+		if (s == 0){
+			r0++;
+		}
+		if (r0 == 1 && s == arr.length - 1){
+			for (q = 0; q < 10; q++){
+				if (queue0[q].length > 0){
+					var qq;
+					for (qq = 0; qq < queue0[q].length; qq++){
+						numLen0 = Math.ceil(Math.max(Math.log(queue0[q][qq][1-nIter2d] + 1) / Math.LN10, numLen0));
+					}
+				}
+			}
+		}
+		if ((r0 == 1)&&(s == 0)){
+		queue0 = [ [],[],[],[],[],[],[],[],[],[] ];
+		}
+		var digit = Math.floor((arr[findI(s, len)][findJ(s, len)][1-nIter2d] % Math.pow(10, Math.ceil(r0/2))) / Math.pow(10, Math.ceil(r0/2)-1));
+		if (r0 % 2){
+			if (queue0[digit] != null){
+				queue0[digit].push(arr[findI(s, len)][findJ(s, len)]);
+				highlight2d(findI(s, len), findJ(s, len));
+			}
+		}
+		else {
+			for (q = 0; q < 10; q++){
+				if (queue0[q].length > 0){
+					arr[findI(s, len)][findJ(s, len)] = queue0[q][0];
+					highlight2d(findI(s, len), findJ(s, len), 1);
+					queue0[q].shift();
+					break;
+				}
+			}
+		}
+			update([[findI(s-1, len), findJ(s-1, len)], [findI(s, len), findJ(s, len)], [findI(s+1, len), findJ(s+1, len)]]);
+		if (sortCheck()){
+			setTimeout(function(){radixLSDSort2d(arr, (s + 1) % (Math.pow(arr.length, 2)), r0, queue0, numLen0);}, delay);
 		}
 	}
 	else {sortFinish(0);}
