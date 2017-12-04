@@ -599,6 +599,21 @@ function sort(type){
 			gnomeSort(mainArr, 0);
 			updateStat(3, 'Gnome sort');
 			break;
+			
+			case 'shellSort':
+			shellSort(mainArr, 0, 0, 0);
+			updateStat(3, 'Shell sort');
+			break;
+			
+			case 'selectionSort':
+			selectionSort(mainArr, 0, 0, 0);
+			updateStat(3, 'Selection sort');
+			break;
+			
+			case 'biSelectionSort':
+			biSelectionSort(mainArr, 0, 0, 0, 0);
+			updateStat(3, 'Biselection sort');
+			break;
 		
 			case 'radixLSDSort':
 			radixLSDSort(mainArr, 0, 0, 0, 0);
@@ -658,6 +673,27 @@ function sort(type){
 				}
 				break;
 		
+				case 'shellSort':
+				shellSort(mainArr[nLine2d], 0, 0, 0);
+				if (currStat != 3){
+					updateStat(3, 'Shell sort');
+				}
+				break;
+				
+				case 'selectionSort':
+				selectionSort(mainArr[nLine2d], 0, 0, 0);
+				if (currStat != 3){
+					updateStat(3, 'Selection sort');
+				}
+				break;
+				
+				case 'biSelectionSort':
+				biSelectionSort(mainArr[nLine2d], 0, 0, 0, 0);
+				if (currStat != 3){
+					updateStat(3, 'Biselection sort');
+				}
+				break;
+		
 				case 'radixLSDSort':
 				radixLSDSort(mainArr[nLine2d], 0, 0, 0, 0);
 				if (currStat != 3){
@@ -710,6 +746,27 @@ function sort(type){
 				}
 				break;
 		
+				case 'shellSort':
+				shellSort2d(mainArr, 0, 0, 0);
+				if (currStat != 3){
+					updateStat(3, 'Shell sort');
+				}
+				break;
+				
+				case 'selectionSort':
+				selectionSort2d(mainArr, 0, 0, 0);
+				if (currStat != 3){
+					updateStat(3, 'Selection sort');
+				}
+				break;
+				
+				case 'biSelectionSort':
+				biSelectionSort2d(mainArr, 0, 0, 0, 0);
+				if (currStat != 3){
+					updateStat(3, 'Biselection sort');
+				}
+				break;
+		
 				case 'radixLSDSort':
 				radixLSDSort2d(mainArr, 0, 0, 0, 0);
 				if (currStat != 3){
@@ -731,8 +788,9 @@ function sortFinish(code, str){
 		break;
 		
 		case 2:
-		if (nIter2d >= 2){
+		if (nIter2d >= 1 && nLine2d >= arrLen-1){
 			sorting = false;
+			mainArr = transArr(mainArr);
 			update();
 			updateStat(1);
 			return 0;
@@ -1241,6 +1299,294 @@ function insertionSort2d(arr, s, r){
 			else {
 				setTimeout(function(){insertionSort2d(arr, (r0 - 1) % (Math.pow(arr.length, 2) - 1), r0);}, delay);
 			}
+		}
+	}
+	else {sortFinish(0);}
+}
+
+//Shell sort
+function shellSort(arr, s, r, iter){
+	var r0 = r;
+	var iter0 = iter;
+	if (r0 > arr.length){
+			iter0++;
+		}
+	var g = 1;
+	var i;
+	for (i = 0; g < arr.length; i++){
+		g = Math.pow(2, i) - 1;
+	}
+	g = Math.pow(2, i-iter0-2) - 1;
+	
+	if (g >= 1){
+		r0 = Math.max(r0, g);
+		var n = false;
+		if (r0 > arr.length){
+			r0 = g;
+			n = true;
+		}
+		if (arr[s] != null && dimSel(arr[s+g], arr[s+g][1-nIter2d]) < dimSel(arr[s], arr[s][1-nIter2d])){
+			swap(arr, s+g, s);
+			switch (dim){
+				case 1:
+				highlight(s);
+				highlight(s+g);
+				break;
+				
+				case 2:
+				highlight2d(nLine2d, s);
+				highlight2d(nLine2d, s+g);
+				break;
+			}
+		}
+		else {
+			n = true;
+			r0++;
+			switch (dim){
+				case 1:
+				highlight(s+g, 1);
+				break;
+				
+				case 2:
+				highlight2d(nLine2d, s+g, 1);
+				break;
+			}
+		}
+		switch (dim){
+			case 1:
+			highlight(r, 2);
+			update([s, s+g]);
+			break;
+			
+			case 2:
+			highlight2d(nLine2d, r, 2);
+			update([[nLine2d, s], [nLine2d, s+g]]);
+			break;
+		}
+		if (sortCheck()){
+			if (n){
+				setTimeout(function(){shellSort(arr, (r0 - g - 1) % (arr.length - 1), r0, iter0);}, delay);
+			}
+			else {
+				setTimeout(function(){shellSort(arr, (s - g) % (arr.length - 1), r0, iter0);}, delay);
+			}
+		}
+	}
+	else {sortFinish(0);}
+}
+
+//Shell sort with 2d array
+function shellSort2d(arr, s, r, iter){
+	var r0 = r;
+	var iter0 = iter;
+	if (r0 > Math.pow(arr.length, 2)){
+			iter0++;
+		}
+	var g = 1;
+	var i;
+	for (i = 0; g < Math.pow(arr.length, 2); i++){
+		g = Math.pow(2, i) - 1;
+	}
+	g = Math.pow(2, i - iter0 - 2) - 1;
+	if (g >= 1){
+		r0 = Math.max(r0, g);
+		var len = arr[0].length;
+		var n = false;
+		if (r0 > Math.pow(arr.length, 2)){
+			r0 = g;
+			n = true;
+		}
+		if (arr[findI(s, len)] != null && arr[findI(s+g, len)][findJ(s+g, len)][1-nIter2d] < arr[findI(s, len)][findJ(s, len)][1-nIter2d]){
+			swap2d(arr, [findI(s+g, len), findJ(s+g, len)], [findI(s, len), findJ(s, len)]);
+			highlight2d(findI(s, len), findJ(s, len));
+			highlight2d(findI(s+g, len), findJ(s+g, len));
+		}
+		else {
+			n = true;
+			r0++;
+			highlight2d(findI(s+g, len), findJ(s+g, len), 1);
+		}
+		highlight2d(findI(r, len), findJ(r, len), 2);
+		update([[findI(s, len), findJ(s, len)], [findI(s+g, len), findJ(s+g, len)]]);
+		if (sortCheck()){
+			if (n){
+				setTimeout(function(){shellSort2d(arr, (r0 - g - 1) % (Math.pow(arr.length, 2) - 1), r0, iter0);}, delay);
+			}
+			else {
+				setTimeout(function(){shellSort2d(arr, (s - g) % (Math.pow(arr.length, 2) - 1), r0, iter0);}, delay);
+			}
+		}
+	}
+	else {sortFinish(0);}
+}
+
+//Selection sort
+function selectionSort(arr, s, r, min){
+	if (r < arr.length - 1){
+		var r0 = r;
+		var min0 = min;
+		if (arr[s] != null && dimSel(arr[s], arr[s][1-nIter2d]) < dimSel(arr[min0], arr[min0][1-nIter2d])){
+			min0 = s;
+			switch (dim){
+				case 1:
+				highlight(s, 1);
+				break;
+				
+				case 2:
+				highlight2d(nLine2d, s, 1);
+				break;
+			}
+		}
+		else {
+			switch (dim){
+				case 1:
+				highlight(s);
+				break;
+				
+				case 2:
+				highlight2d(nLine2d, s);
+				break;
+			}
+		}
+		if (s >= arr.length - 1){
+			swap(arr, r0, min0);
+			switch (dim){
+				case 1:
+				highlight(min0, 1);
+				break;
+				
+				case 2:
+				highlight2d(nLine2d, min0, 1);
+				break;
+			}
+			r0++;
+			min0 = r0;
+		}
+		switch (dim){
+			case 1:
+			highlight(r, 2);
+			update([s, r]);
+			break;
+			
+			case 2:
+			highlight2d(nLine2d, r, 2);
+			update([[nLine2d, s], [nLine2d, r]]);
+			break;
+		}
+		if (sortCheck()){
+			setTimeout(function(){selectionSort(arr, Math.max(r0, (s + 1) % (arr.length)), r0, min0);}, delay);
+		}
+	}
+	else {sortFinish(0);}
+}
+
+//Selection sort with 2d array
+function selectionSort2d(arr, s, r, min){
+	if (r < Math.pow(arr.length, 2) - 1){
+		var len = arr[0].length;
+		var r0 = r;
+		var min0 = min;
+		if (arr[findI(s, len)] != null && arr[findI(s, len)][findJ(s, len)][1-nIter2d] < arr[findI(min0, len)][findJ(min0, len)][1-nIter2d]){
+			min0 = s;
+			highlight2d(findI(s, len), findJ(s, len), 1);
+		}
+		else {
+			highlight2d(findI(s, len), findJ(s, len));
+		}
+		if (s >= Math.pow(arr.length, 2) - 1){
+			swap2d(arr, [findI(r0, len), findJ(r0, len)], [findI(min0, len), findJ(min0, len)]);
+			highlight2d(findI(min0, len), findJ(min0, len), 1)
+			r0++;
+			min0 = r0;
+		}
+		highlight2d(findI(r, len), findJ(r, len), 2);
+		update([[findI(s, len), findJ(s, len)], [findI(r, len), findJ(r, len)]]);
+		if (sortCheck()){
+			setTimeout(function(){selectionSort2d(arr, Math.max(r0, (s + 1) % Math.pow(arr.length, 2)), r0, min0);}, delay);
+		}
+	}
+	else {sortFinish(0);}
+}
+
+//Biselection sort
+function biSelectionSort(arr, s, r, min, max){
+	if (r <= (arr.length) / 2){
+		var r0 = r;
+		var min0 = min;
+		var max0 = max;
+		if (arr[s] != null && dimSel(arr[s], arr[s][1-nIter2d]) <= dimSel(arr[min0], arr[min0][1-nIter2d])){
+			min0 = s;
+			switch (dim){
+				case 1:
+				highlight(s, 1);
+				break;
+				
+				case 2:
+				highlight2d(nLine2d, s, 1);
+				break;
+			}
+		}
+		//else {
+			if (arr[s] != null && dimSel(arr[s], arr[s][1-nIter2d]) >= dimSel(arr[max0], arr[max0][1-nIter2d])){
+				max0 = s;
+				switch (dim){
+				case 1:
+				highlight(s, 1);
+				break;
+				
+				case 2:
+				highlight2d(nLine2d, s, 1);
+				break;
+			}
+			}
+			else {
+				switch (dim){
+				case 1:
+				highlight(s);
+				break;
+				
+				case 2:
+				highlight2d(nLine2d, s);
+				break;
+				}
+			}
+		//}
+		if (s >= arr.length - r - 1){
+			console.log(min0+' '+max0+' '+arr[min0]+' '+arr[max0]);
+			swap(arr, r, min0);
+			if (min0 != max0){
+				swap(arr, arr.length - r - 1, max0);
+			}
+			switch (dim){
+				case 1:
+				highlight(min0, 1);
+				highlight(max0, 1);
+				break;
+				
+				case 2:
+				highlight2d(nLine2d, min0, 1);
+				highlight2d(nLine2d, max0, 1);
+				break;
+			}
+			r0++;
+			min0 = r0;
+			max0 = arr.length - r0 - 1;
+		}
+		switch (dim){
+			case 1:
+			highlight(r, 2);
+			highlight(arr.length - r - 1, 2);
+			update([s, r, arr.length - r - 1]);
+			break;
+			
+			case 2:
+			highlight2d(nLine2d, r, 2);
+			highlight2d(nLine2d, arr.length - r - 1, 2);
+			update([[nLine2d, s], [nLine2d, r], [nLine2d, arr.length - r - 1]]);
+			break;
+		}
+		if (sortCheck()){
+			setTimeout(function(){biSelectionSort(arr, Math.max(r0, (s + 1) % (arr.length - r0)), r0, min0, max0);}, delay);
 		}
 	}
 	else {sortFinish(0);}
