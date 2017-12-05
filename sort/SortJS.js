@@ -618,7 +618,7 @@ function sort(type){
 			quickSort(mainArr, 0, 0, 0, 0);
 			updateStat(3, 'Quick sort');
 			break;
-		
+			
 			case 'radixLSDSort':
 			radixLSDSort(mainArr, 0, 0, 0, 0);
 			updateStat(3, 'Radix LSD sort');
@@ -1663,50 +1663,51 @@ function quickSort(arr, s, r, min, max, p, parts){
 	}
 	if (parts0.length > 0 || p0 != null){
 		if (!n){
-		if (s >= max0){
-			swap(arr, r0 + 1, p0);
-			p0 = r0 + 1;
-			if (max0 - p0 > 1 && p0 + 1 < max0){
-			parts0.unshift([p0 + 1, max0]);	
+			if (s >= max0){
+				swap(arr, r0 + 1, p0);
+				p0 = r0 + 1;
+				if (max0 - p0 > 1 && p0 + 1 < max0){
+				parts0.unshift([p0 + 1, max0]);	
+				}
+				if (p0 - min0 > 1 && min0 < p0 - 1){
+				parts0.unshift([min0, p0 - 1]);	
+				}
+				p0 = null;
 			}
-			if (p0 - min0 > 1 && min0 < p0 - 1){
-			parts0.unshift([min0, p0 - 1]);	
-			}
-			p0 = null;
-		}
-		else {
-			if (dimSel(arr[s], arr[s][1-nIter2d]) <= dimSel(arr[p0], arr[p0][1-nIter2d])){
-				swap(arr, s, ++r0);
-				switch (dim){
-					case 1:
-					highlight(s, 1);
-					highlight(r0, 1);
-					break;
+			else {
+				if (dimSel(arr[s], arr[s][1-nIter2d]) <= dimSel(arr[p0], arr[p0][1-nIter2d])){
+					swap(arr, s, ++r0);
+					switch (dim){
+						case 1:
+						highlight(s, 1);
+						highlight(r0, 1);
+						break;
 				
-					case 2:
-					highlight2d(nLine2d, s, 1);
-					highlight2d(nLine2d, r0, 1);
-					break;
+						case 2:
+						highlight2d(nLine2d, s, 1);
+						highlight2d(nLine2d, r0, 1);
+						break;
+					}
 				}
 			}
-		}
-		}
-		switch (dim){
-			case 1:
-			highlight(s);
-			highlight(p0);
-			highlight(min0 - 1, 2);
-			highlight(max0 + 1, 2);
-			update([s, p0, r0, min0 - 1, max0 + 1]);
-			break;
+		
+			switch (dim){
+				case 1:
+				highlight(s);
+				highlight(p0);
+				highlight(min0 - 1, 2);
+				highlight(max0 + 1, 2);
+				update([s, p0, r0, min0 - 1, max0 + 1]);
+				break;
 			
-			case 2:
-			highlight2d(nLine2d, s);
-			highlight2d(nLine2d, p0);
-			highlight2d(nLine2d, min0 - 1, 2);
-			highlight2d(nLine2d, max0 + 1, 2);
-			update([[nLine2d, s], [nLine2d, p0], [nLine2d, r0], [nLine2d, min0 - 1], [nLine2d, max0 + 1]]);
-			break;
+				case 2:
+				highlight2d(nLine2d, s);
+				highlight2d(nLine2d, p0);
+				highlight2d(nLine2d, min0 - 1, 2);
+				highlight2d(nLine2d, max0 + 1, 2);
+				update([[nLine2d, s], [nLine2d, p0], [nLine2d, r0], [nLine2d, min0 - 1], [nLine2d, max0 + 1]]);
+				break;
+			}
 		}
 		if (sortCheck()){
 			if (n){
@@ -1738,36 +1739,36 @@ function quickSort2d(arr, s, r, min, max, p, parts){
 		max0 = parts0[0][1];
 		p0 = max0;
 		parts0.shift();
-		r0 = min0 - 1;
+		r0 = max0 - 1;
 		n = true;
 	}
 	if (parts0.length > 0 || p0 != null){
 		if (!n){
-		if (s >= max0){
-			swap2d(arr, [findI(r0 + 1, len), findJ(r0 + 1, len)], [findI(p0, len), findJ(p0, len)]);
-			p0 = r0 + 1;
-			if (max0 - p0 > 1 && p0 + 1 < max0){
-			parts0.unshift([p0 + 1, max0]);	
+			if (s >= max0){
+				swap2d(arr, [findI(r0 + 1, len), findJ(r0 + 1, len)], [findI(p0, len), findJ(p0, len)]);
+				p0 = r0 + 1;
+				if (max0 - p0 > 1 && p0 + 1 < max0){
+				parts0.unshift([p0 + 1, max0]);	
+				}
+				if (p0 - min0 > 1 && min0 < p0 - 1){
+				parts0.unshift([min0, p0 - 1]);	
+				}
+				p0 = null;
 			}
-			if (p0 - min0 > 1 && min0 < p0 - 1){
-			parts0.unshift([min0, p0 - 1]);	
+			else {
+				if (arr[findI(s, len)][findJ(s, len)][1-nIter2d] <= arr[findI(p0, len)][findJ(p0, len)][1-nIter2d]){
+					r0++;
+					swap2d(arr, [findI(s, len), findJ(s, len)], [findI(r0, len), findJ(r0, len)]);
+					highlight2d(findI(s, len), findJ(s, len), 1);
+					highlight2d(findI(r0, len), findJ(r0, len), 1);
+				}
 			}
-			p0 = null;
+			highlight2d(findI(s, len), findJ(s, len));
+			highlight2d(findI(p0, len), findJ(p0, len));
+			highlight2d(findI(min0 - 1, len), findJ(min0 - 1, len), 2);
+			highlight2d(findI(max0 + 1, len), findJ(max0 + 1, len), 2);
+			update([[findI(s, len), findJ(s, len)], [findI(p0, len), findJ(p0, len)], [findI(r0, len), findJ(r0, len)], [findI(min0 - 1, len), findJ(min0 - 1, len)], [findI(max0 + 1, len), findJ(max0 + 1, len)]]);
 		}
-		else {
-			if (arr[findI(s, len)][findJ(s, len)][1-nIter2d] <= arr[findI(p0, len)][findJ(p0, len)][1-nIter2d]){
-				r0++;
-				swap2d(arr, [findI(s, len), findJ(s, len)], [findI(r0, len), findJ(r0, len)]);
-				highlight2d(findI(s, len), findJ(s, len), 1);
-				highlight2d(findI(r0, len), findJ(r0, len), 1);
-			}
-		}
-		}
-		highlight2d(findI(s, len), findJ(s, len));
-		highlight2d(findI(p0, len), findJ(p0, len));
-		highlight2d(findI(min0 - 1, len), findJ(min0 - 1, len), 2);
-		highlight2d(findI(max0 + 1, len), findJ(max0 + 1, len), 2);
-		update([[findI(s, len), findJ(s, len)], [findI(p0, len), findJ(p0, len)], [findI(r0, len), findJ(r0, len)], [findI(min0 - 1, len), findJ(min0 - 1, len)], [findI(max0 + 1, len), findJ(max0 + 1, len)]]);
 		if (sortCheck()){
 			if (n){
 				setTimeout(function(){quickSort2d(arr, min0, r0, min0, max0, p0, parts0);}, delay);
