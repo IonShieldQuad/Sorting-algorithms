@@ -1739,7 +1739,7 @@ function quickSort2d(arr, s, r, min, max, p, parts){
 		max0 = parts0[0][1];
 		p0 = max0;
 		parts0.shift();
-		r0 = max0 - 1;
+		r0 = min0 - 1;
 		n = true;
 	}
 	if (parts0.length > 0 || p0 != null){
