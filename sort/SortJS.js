@@ -10,7 +10,7 @@ var delay;										//Delay between updates
 var animHdl;									//Animation timer handle
 var animOffset = 0;								//Offset, used for animation
 var currStat = 0;								//Current displayed status
-var dim;										//Nomber of dimensions, 1d or 2d
+var dim;										//Number of dimensions, 1d or 2d
 var nLine2d;									//Number of sorting line in 2d	
 var nIter2d;									//Number of times sorted all lines in 2d
 var sortType2d;									//Current sort type in 2d
@@ -623,6 +623,11 @@ function sort(type){
 			radixLSDSort(mainArr, 0, 0, 0, 0);
 			updateStat(3, 'Radix LSD sort');
 			break;
+			
+			case 'heapSort':
+			heapSort(mainArr, 0, 0, 0, 0);
+			updateStat(3, 'Heap sort');
+			break;
 		}
 		break;
 		
@@ -704,6 +709,13 @@ function sort(type){
 					updateStat(3, 'Radix LSD sort');
 				}
 				break;
+				
+				case 'heapSort':
+				heapSort(mainArr[nLine2d], 0, 0, 0, 0);
+				if (currStat != 3){
+					updateStat(3, 'Heap sort');
+				}
+				break;
 			}
 		}
 		else {
@@ -775,6 +787,13 @@ function sort(type){
 				radixLSDSort2d(mainArr, 0, 0, 0, 0);
 				if (currStat != 3){
 					updateStat(3, 'Radix LSD sort');
+				}
+				break;
+				
+				case 'heapSort':
+				heapSort2d(mainArr, 0, 0, 0, 0);
+				if (currStat != 3){
+					updateStat(3, 'Heap sort');
 				}
 				break;
 			}
@@ -1775,6 +1794,240 @@ function quickSort2d(arr, s, r, min, max, p, parts){
 			}
 			else{
 				setTimeout(function(){quickSort2d(arr, Math.max(min0, (s + 1) % (max0 + 1)), r0, min0, max0, p0, parts0);}, delay);
+			}
+		}
+	}
+	else {sortFinish(0);}
+}
+
+//Heap sort
+function heapSort(arr, s, r, p, heap, iter){
+	var heap0 = heap;
+	var iter0 = iter;
+	var p0 = p;
+	var r0 = r;
+	var n;
+	if (heap0 == null){
+		heap0 = false;
+	}
+	if (iter0 == null){
+		iter0 = 0;
+	}
+	if (r0 < arr.length - 1){
+		if (heap0){
+			var max = p0;
+			var li = 2 * p0 + 1;
+			var ri = 2 * p0 + 2;
+			
+			if (li < arr.length - r0 && dimSel(arr[li], arr[li][1-nIter2d]) > dimSel(arr[max], arr[max][1-nIter2d])){
+				max = li;
+			}
+			if (ri < arr.length - r0 && dimSel(arr[ri], arr[ri][1-nIter2d]) > dimSel(arr[max], arr[max][1-nIter2d])){
+				max = ri;
+			}
+			
+			switch (dim){
+				case 1:
+				highlight(p0);
+				if (li < arr.length - r0){
+					highlight(li);
+				}
+				if (ri < arr.length - r0){
+					highlight(ri);
+				}
+				break;
+					
+				case 2:
+				highlight2d(nLine2d, p0);
+				if (li < arr.length - r0){
+					highlight2d(nLine2d, li);
+				}
+				if (ri < arr.length - r0){
+					highlight2d(nLine2d, ri);
+				}
+				break;
+			}
+			
+			if (max != p0){
+				swap(arr, max, p0);
+				switch (dim){
+					case 1:
+					highlight(max, 1);
+					highlight(p0, 1);
+					break;
+					
+					case 2:
+					highlight2d(nLine2d, max, 1);
+					highlight2d(nLine2d, p0, 1);
+					break;
+				}
+				p0 = max;
+			}
+			else {
+				heap0 = false;
+				p0 = null;
+			}
+			
+			switch (dim){
+				case 1:
+				highlight(arr.length - r0, 2);
+				update([ri, li, p]);
+				break;
+				
+				case 2:
+				highlight2d(nLine2d, arr.length - r0, 2);
+				update([[nLine2d, ri], [nLine2d, li], [nLine2d, p]]);
+				break;
+			}
+		}
+		else {
+			switch(iter0){
+				case 0:
+				n = arr.length / 2 - 1;
+				iter0++;
+				break;
+				
+				case 1:
+				if (s < 0){
+					n = arr.length - 1;
+					iter0++;
+					break;
+				}
+				heap0 = true;
+				p0 = s;
+				break;
+				
+				case 2:
+				swap(arr, 0, s);
+				switch (dim){
+					case 1:
+					highlight(0, 1);
+					highlight(s, 1);
+					highlight(arr.length - r0, 2);
+					update([0, s, arr.length - r0]);
+					break;
+					
+					case 2:
+					highlight2d(nLine2d, 0, 1);
+					highlight2d(nLine2d, s, 1);
+					highlight2d(nLine2d, arr.length - r0, 2);
+					update([[nLine2d, 0], [nLine2d, s], [nLine2d, arr.length - r0]]);
+					break;
+				}
+				heap0 = true;
+				p0 = 0;
+				r0++;
+				break;
+			}
+		}
+	
+		if (sortCheck()){
+			if (heap){
+				setTimeout(function(){heapSort(arr, s, r0, p0, heap0, iter0);}, delay);
+			}
+			else{
+				if (n == null){
+					setTimeout(function(){heapSort(arr, (s - 1) % (arr.length), r0, p0, heap0, iter0);}, delay);
+				}
+				else {
+					setTimeout(function(){heapSort(arr, n, r0, p0, heap0, iter0);}, delay);
+				}
+			}
+		}
+	}
+	else {sortFinish(0);}
+}
+
+//Heap sort with 2d array
+function heapSort2d(arr, s, r, p, heap, iter){
+	var heap0 = heap;
+	var iter0 = iter;
+	var p0 = p;
+	var r0 = r;
+	var n;
+	var len = arr[0].length;
+	if (heap0 == null){
+		heap0 = false;
+	}
+	if (iter0 == null){
+		iter0 = 0;
+	}
+	if (r0 < Math.pow(arr.length, 2) - 1){
+		if (heap0){
+			var max = p0;
+			var li = 2 * p0 + 1;
+			var ri = 2 * p0 + 2;
+			
+			if (li < Math.pow(arr.length, 2) - r0 && arr[findI(li, len)][findJ(li, len)][1-nIter2d] > arr[findI(max, len)][findJ(max, len)][1-nIter2d]){
+				max = li;
+			}
+			if (ri < Math.pow(arr.length, 2) - r0 && arr[findI(ri, len)][findJ(ri, len)][1-nIter2d] > arr[findI(max, len)][findJ(max, len)][1-nIter2d]){
+				max = ri;
+			}
+			
+			highlight2d(findI(p0, len), findJ(p0, len));
+			if (li < Math.pow(arr.length, 2) - r0){
+				highlight2d(findI(li, len), findJ(li, len));
+			}
+			if (ri < Math.pow(arr.length, 2) - r0){
+			highlight2d(findI(ri, len), findJ(ri, len));
+			}
+			
+			if (max != p0){
+				swap2d(arr, [findI(max, len), findJ(max, len)], [findI(p0, len), findJ(p0, len)]);
+				highlight2d(findI(max, len), findJ(max, len), 1);
+				highlight2d(findI(p0, len), findJ(p0, len), 1);
+				p0 = max;
+			}
+			else {
+				heap0 = false;
+				p0 = null;
+			}
+			
+			highlight2d(findI(Math.pow(arr.length, 2) - r0, len), findJ(Math.pow(arr.length, 2) - r0, len), 2);
+			update([[findI(li, len), findJ(li, len)], [findI(ri, len), findJ(ri, len)], [findI(p, len), findJ(p, len)]]);
+		}
+		else {
+			switch(iter0){
+				case 0:
+				n = Math.pow(arr.length, 2) / 2 - 1;
+				iter0++;
+				break;
+				
+				case 1:
+				if (s < 0){
+					n = Math.pow(arr.length, 2) - 1;
+					iter0++;
+					break;
+				}
+				heap0 = true;
+				p0 = s;
+				break;
+				
+				case 2:
+				swap2d(arr, [findI(0, len), findJ(0, len)], [findI(s, len), findJ(s, len)]);
+				highlight2d(findI(0, len), findJ(0, len), 1);
+				highlight2d(findI(s, len), findJ(s, len), 1);
+				highlight2d(findI(Math.pow(arr.length, 2) - r0, len), findJ(Math.pow(arr.length, 2) - r0, len), 2);
+				update([[findI(0, len), findJ(0, len)], [findI(s, len), findJ(s, len)], [findI(Math.pow(arr.length, 2) - r0, len), findJ(Math.pow(arr.length, 2) - r0)]]);
+				heap0 = true;
+				p0 = 0;
+				r0++;
+				break;
+			}
+		}
+	
+		if (sortCheck()){
+			if (heap){
+				setTimeout(function(){heapSort2d(arr, s, r0, p0, heap0, iter0);}, delay);
+			}
+			else{
+				if (n == null){
+					setTimeout(function(){heapSort2d(arr, (s - 1) % Math.pow(arr.length, 2), r0, p0, heap0, iter0);}, delay);
+				}
+				else {
+					setTimeout(function(){heapSort2d(arr, n, r0, p0, heap0, iter0);}, delay);
+				}
 			}
 		}
 	}
