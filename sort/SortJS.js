@@ -1818,7 +1818,6 @@ function heapSort(arr, s, r, p, heap, iter){
 			var max = p0;
 			var li = 2 * p0 + 1;
 			var ri = 2 * p0 + 2;
-			
 			if (li < arr.length - r0 && dimSel(arr[li], arr[li][1-nIter2d]) > dimSel(arr[max], arr[max][1-nIter2d])){
 				max = li;
 			}
@@ -1883,7 +1882,7 @@ function heapSort(arr, s, r, p, heap, iter){
 		else {
 			switch(iter0){
 				case 0:
-				n = arr.length / 2 - 1;
+				n = Math.floor(arr.length / 2) - 1;
 				iter0++;
 				break;
 				
@@ -1990,7 +1989,7 @@ function heapSort2d(arr, s, r, p, heap, iter){
 		else {
 			switch(iter0){
 				case 0:
-				n = Math.pow(arr.length, 2) / 2 - 1;
+				n = Math.floor(Math.pow(arr.length, 2) / 2) - 1;
 				iter0++;
 				break;
 				
